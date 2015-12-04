@@ -9,10 +9,14 @@ use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\LangQuery;
+use Thelia\Model\Map\CategoryTableMap;
+use Thelia\Model\Map\ContentTableMap;
+use Thelia\Model\Map\FolderTableMap;
 use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
 use Thelia\Model\RewritingUrlQuery;
+use Thelia\Tools\URL;
 
 /**
  * Class SitemapController
@@ -41,7 +45,7 @@ class SitemapController extends BaseFrontController
         }
 
         // Get sitemap cache information
-        $cacheContent = false;
+        $sitemapContent = false;
         $cacheDir = $this->getCacheDir();
         $cacheKey = self::SITEMAP_CACHE_KEY . $locale;
         $cacheExpire = intval(ConfigQuery::read("sitemap_ttl", '7200')) ?: 7200;
@@ -50,25 +54,25 @@ class SitemapController extends BaseFrontController
         // Check if sitemap has to be deleted
         if (!($this->checkAdmin() && "" !== $this->getRequest()->query->get("flush", ""))){
             // Get cached sitemap
-            $cacheContent = $cacheDriver->fetch($cacheKey);
+            $sitemapContent = $cacheDriver->fetch($cacheKey);
         } else {
             $cacheDriver->delete($cacheKey);
         }
 
-        // If not in cache
-        if (false === $cacheContent){
-            // Generate sitemap
+        // If not in cache, generate and cache it
+        if (false === $sitemapContent){
+            // Generate sitemap function
             $sitemap = $this->generateSitemap($locale);
 
-            $cacheContent = implode("\n", $sitemap);
+            $sitemapContent = implode("\n", $sitemap);
 
             // Save cache
-            $cacheDriver->save($cacheKey, $cacheContent, $cacheExpire);
+            $cacheDriver->save($cacheKey, $sitemapContent, $cacheExpire);
         }
 
         // Render
         $response = new Response();
-        $response->setContent($cacheContent);
+        $response->setContent($sitemapContent);
         $response->headers->set('Content-Type', 'application/xml');
 
         return $response;
@@ -92,14 +96,72 @@ class SitemapController extends BaseFrontController
             </url>'
         ];
 
-        // Get products
+        // Hydrate sitemap
+        $this->setSitemapCategories($sitemap, $locale);
         $this->setSitemapProducts($sitemap, $locale);
+        $this->setSitemapFolders($sitemap, $locale);
+        $this->setSitemapContents($sitemap, $locale);
+
 
         // End sitemap
         $sitemap[] = "\t".'</urlset>';
 
         return $sitemap;
     }
+
+    protected function setSitemapCategories(&$sitemap, $locale)
+    {
+        // Prepare query - get categories URL
+        $query = RewritingUrlQuery::create()
+            ->filterByView('category')
+            ->filterByRedirected(null)
+            ->filterByViewLocale($locale);
+
+        // Join with visible categories
+        self::addJoinCategory($query);
+
+        // Get categories last update
+        $query->withColumn(CategoryTableMap::UPDATED_AT, 'CATEGORY_UPDATE_AT');
+
+        // Execute query
+        $results = $query->find();
+
+        // For each result, use URL and update to hydrate XML file
+        /** @var RewritingUrl $result */
+        foreach ($results as $result) {
+            $sitemap[] = '
+            <url>
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
+                <lastmod>'.$result->getVirtualColumn('CATEGORY_UPDATE_AT').'</lastmod>
+            </url>';
+        }
+    }
+
+    /**
+     * @param Criteria $query
+     */
+    protected function addJoinCategory(Criteria &$query)
+    {
+        // Join RewritingURL with Category
+        $join = new Join();
+
+        $join->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            CategoryTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+
+        $join->setJoinType(Criteria::INNER_JOIN);
+
+        $query->addJoinObject($join, 'categoryJoin');
+
+        // Get only visible categories
+        $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+    }
+
 
     protected function setSitemapProducts(&$sitemap, $locale)
     {
@@ -112,19 +174,18 @@ class SitemapController extends BaseFrontController
         // Join with visible products
         self::addJoinProduct($query);
 
-        // Get products last update date
+        // Get products last update
         $query->withColumn(ProductTableMap::UPDATED_AT, 'PRODUCT_UPDATE_AT');
 
         // Execute query
         $results = $query->find();
 
-
-        // For each result, use URL and update date to hydrate XML file
+        // For each result, use URL and update to hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
             $sitemap[] = '
             <url>
-                <loc>'.$result->getUrl().'</loc>
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
                 <lastmod>'.$result->getVirtualColumn('PRODUCT_UPDATE_AT').'</lastmod>
             </url>';
         }
@@ -154,6 +215,118 @@ class SitemapController extends BaseFrontController
         // Get only visible products
         $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
+
+
+    protected function setSitemapFolders(&$sitemap, $locale)
+    {
+        // Prepare query - get folders URL
+        $query = RewritingUrlQuery::create()
+            ->filterByView('folder')
+            ->filterByRedirected(null)
+            ->filterByViewLocale($locale);
+
+        // Join with visible folders
+        self::addJoinFolder($query);
+
+        // Get folders last update
+        $query->withColumn(FolderTableMap::UPDATED_AT, 'FOLDER_UPDATE_AT');
+
+        // Execute query
+        $results = $query->find();
+
+        // For each result, use URL and update to hydrate XML file
+        /** @var RewritingUrl $result */
+        foreach ($results as $result) {
+            $sitemap[] = '
+            <url>
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
+                <lastmod>'.$result->getVirtualColumn('FOLDER_UPDATE_AT').'</lastmod>
+            </url>';
+        }
+    }
+
+    /**
+     * @param Criteria $query
+     */
+    protected function addJoinFolder(Criteria &$query)
+    {
+        // Join RewritingURL with Folder
+        $join = new Join();
+
+        $join->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            FolderTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+
+        $join->setJoinType(Criteria::INNER_JOIN);
+
+        $query->addJoinObject($join, 'folderJoin');
+
+        // Get only visible folders
+        $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+    }
+
+
+    protected function setSitemapContents(&$sitemap, $locale)
+    {
+        // Prepare query - get contents URL
+        $query = RewritingUrlQuery::create()
+            ->filterByView('content')
+            ->filterByRedirected(null)
+            ->filterByViewLocale($locale);
+
+        // Join with visible contents
+        self::addJoinContent($query);
+
+        // Get contents last update
+        $query->withColumn(ContentTableMap::UPDATED_AT, 'CONTENT_UPDATE_AT');
+
+        // Execute query
+        $results = $query->find();
+
+        // For each result, use URL and update to hydrate XML file
+        /** @var RewritingUrl $result */
+        foreach ($results as $result) {
+            $sitemap[] = '
+            <url>
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
+                <lastmod>'.$result->getVirtualColumn('CONTENT_UPDATE_AT').'</lastmod>
+            </url>';
+        }
+    }
+
+    /**
+     * @param Criteria $query
+     */
+    protected function addJoinContent(Criteria &$query)
+    {
+        // Join RewritingURL with Content
+        $join = new Join();
+
+        $join->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            ContentTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+
+        $join->setJoinType(Criteria::INNER_JOIN);
+
+        $query->addJoinObject($join, 'contentJoin');
+
+        // Get only visible products
+        $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+    }
+
+
+    /* ------------------ */
+
 
     /**
      * @param $locale
