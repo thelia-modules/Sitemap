@@ -18,11 +18,4 @@ class Sitemap extends BaseModule
 {
     /** @var string */
     const DOMAIN_NAME = 'sitemap';
-
-    /*
-     * You may now override BaseModuleInterface methods, such as:
-     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
-     *
-     * Have fun !
-     */
 }

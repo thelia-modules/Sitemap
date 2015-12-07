@@ -33,6 +33,11 @@ class SitemapController extends BaseFrontController
 
     protected $useFallbackTemplate = true;
 
+    /**
+     * Check if cache sitemap can be used or generate a new one and cache it
+     *
+     * @return Response
+     */
     public function generateAction()
     {
         // Get and check locale
@@ -79,7 +84,7 @@ class SitemapController extends BaseFrontController
     }
 
     /**
-     * Build sitemap
+     * Build sitemap array
      *
      * @param $locale
      * @return array
@@ -102,13 +107,21 @@ class SitemapController extends BaseFrontController
         $this->setSitemapFolders($sitemap, $locale);
         $this->setSitemapContents($sitemap, $locale);
 
-
         // End sitemap
         $sitemap[] = "\t".'</urlset>';
 
         return $sitemap;
     }
 
+    /* ------------------ */
+
+    /**
+     * Get categories
+     *
+     * @param $sitemap
+     * @param $locale
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     protected function setSitemapCategories(&$sitemap, $locale)
     {
         // Prepare query - get categories URL
@@ -138,6 +151,8 @@ class SitemapController extends BaseFrontController
     }
 
     /**
+     * Join categories and their URLs
+     *
      * @param Criteria $query
      */
     protected function addJoinCategory(Criteria &$query)
@@ -162,7 +177,13 @@ class SitemapController extends BaseFrontController
         $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
 
-
+    /**
+     * Get products
+     *
+     * @param $sitemap
+     * @param $locale
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     protected function setSitemapProducts(&$sitemap, $locale)
     {
         // Prepare query - get products URL
@@ -192,6 +213,8 @@ class SitemapController extends BaseFrontController
     }
 
     /**
+     * Join products and their URLs
+     *
      * @param Criteria $query
      */
     protected function addJoinProduct(Criteria &$query)
@@ -216,7 +239,13 @@ class SitemapController extends BaseFrontController
         $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
 
-
+    /**
+     * Get folders
+     *
+     * @param $sitemap
+     * @param $locale
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     protected function setSitemapFolders(&$sitemap, $locale)
     {
         // Prepare query - get folders URL
@@ -246,6 +275,8 @@ class SitemapController extends BaseFrontController
     }
 
     /**
+     * Join folders and their URLs
+     *
      * @param Criteria $query
      */
     protected function addJoinFolder(Criteria &$query)
@@ -270,7 +301,13 @@ class SitemapController extends BaseFrontController
         $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
 
-
+    /**
+     * Get contents
+     *
+     * @param $sitemap
+     * @param $locale
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     protected function setSitemapContents(&$sitemap, $locale)
     {
         // Prepare query - get contents URL
@@ -300,6 +337,8 @@ class SitemapController extends BaseFrontController
     }
 
     /**
+     * Join contents and their URLs
+     *
      * @param Criteria $query
      */
     protected function addJoinContent(Criteria &$query)
@@ -324,9 +363,7 @@ class SitemapController extends BaseFrontController
         $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
 
-
     /* ------------------ */
-
 
     /**
      * @param $locale
