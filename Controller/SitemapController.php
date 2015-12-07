@@ -146,10 +146,11 @@ class SitemapController extends BaseFrontController
             ->filterByViewLocale($locale);
 
         // Join with visible categories
-        self::addJoinCategory($query);
+        self::addJoinCategory($query, $locale);
 
-        // Get categories last update
+        // Get categories last update & title
         $query->withColumn(CategoryTableMap::UPDATED_AT, 'CATEGORY_UPDATE_AT');
+        $query->withColumn(CategoryI18nTableMap::TITLE, 'CATEGORY_TITLE');
 
         // Execute query
         $results = $query->find();
@@ -171,13 +172,7 @@ class SitemapController extends BaseFrontController
                 ->findOne();
 
             if ($image !== null) {
-                $title = CategoryI18nQuery::create()
-                    ->filterById($result->getViewId())
-                    ->filterByLocale($locale)
-                    ->select(CategoryI18nTableMap::TITLE)
-                    ->findOne();
-
-                $this->generateSitemapImage('category', $image, $title, $sitemap);
+                $this->generateSitemapImage('category', $image, $result->getVirtualColumn('CATEGORY_TITLE'), $sitemap);
             }
 
             // Close category line
@@ -190,7 +185,7 @@ class SitemapController extends BaseFrontController
      *
      * @param Criteria $query
      */
-    protected function addJoinCategory(Criteria &$query)
+    protected function addJoinCategory(Criteria &$query, $locale)
     {
         // Join RewritingURL with Category
         $join = new Join();
@@ -205,11 +200,34 @@ class SitemapController extends BaseFrontController
         );
 
         $join->setJoinType(Criteria::INNER_JOIN);
-
         $query->addJoinObject($join, 'categoryJoin');
 
         // Get only visible categories
         $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+
+
+        // Join RewritingURL with CategoryI18n
+        $joinI18n = new Join();
+
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            CategoryI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_LOCALE',
+            null,
+            CategoryI18nTableMap::TABLE_NAME,
+            'LOCALE',
+            null
+        );
+
+        $joinI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinI18n, 'categoryI18nJoin');
     }
 
     /**
@@ -232,6 +250,7 @@ class SitemapController extends BaseFrontController
 
         // Get products last update
         $query->withColumn(ProductTableMap::UPDATED_AT, 'PRODUCT_UPDATE_AT');
+        $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
 
         // Execute query
         $results = $query->find();
@@ -253,13 +272,7 @@ class SitemapController extends BaseFrontController
                 ->findOne();
 
             if ($image !== null) {
-                $title = ProductI18nQuery::create()
-                    ->filterById($result->getViewId())
-                    ->filterByLocale($locale)
-                    ->select(ProductI18nTableMap::TITLE)
-                    ->findOne();
-
-                $this->generateSitemapImage('product', $image, $title, $sitemap);
+                $this->generateSitemapImage('product', $image, $result->getVirtualColumn('PRODUCT_TITLE'), $sitemap);
             }
 
             // Close product line
@@ -287,11 +300,34 @@ class SitemapController extends BaseFrontController
         );
 
         $join->setJoinType(Criteria::INNER_JOIN);
-
         $query->addJoinObject($join, 'productJoin');
 
         // Get only visible products
         $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+
+
+        // Join RewritingURL with ProductI18n
+        $joinI18n = new Join();
+
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            ProductI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_LOCALE',
+            null,
+            ProductI18nTableMap::TABLE_NAME,
+            'LOCALE',
+            null
+        );
+
+        $joinI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinI18n);
     }
 
     /**
@@ -314,6 +350,7 @@ class SitemapController extends BaseFrontController
 
         // Get folders last update
         $query->withColumn(FolderTableMap::UPDATED_AT, 'FOLDER_UPDATE_AT');
+        $query->withColumn(FolderI18nTableMap::TITLE, 'FOLDER_TITLE');
 
         // Execute query
         $results = $query->find();
@@ -335,13 +372,7 @@ class SitemapController extends BaseFrontController
                 ->findOne();
 
             if ($image !== null) {
-                $title = FolderI18nQuery::create()
-                    ->filterById($result->getViewId())
-                    ->filterByLocale($locale)
-                    ->select(FolderI18nTableMap::TITLE)
-                    ->findOne();
-
-                $this->generateSitemapImage('folder', $image, $title, $sitemap);
+                $this->generateSitemapImage('folder', $image, $result->getVirtualColumn('FOLDER_TITLE'), $sitemap);
             }
 
             // Close folder line
@@ -369,11 +400,34 @@ class SitemapController extends BaseFrontController
         );
 
         $join->setJoinType(Criteria::INNER_JOIN);
-
         $query->addJoinObject($join, 'folderJoin');
 
         // Get only visible folders
         $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+
+
+        // Join RewritingURL with FolderI18n
+        $joinI18n = new Join();
+
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            FolderI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_LOCALE',
+            null,
+            FolderI18nTableMap::TABLE_NAME,
+            'LOCALE',
+            null
+        );
+
+        $joinI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinI18n);
     }
 
     /**
@@ -396,6 +450,7 @@ class SitemapController extends BaseFrontController
 
         // Get contents last update
         $query->withColumn(ContentTableMap::UPDATED_AT, 'CONTENT_UPDATE_AT');
+        $query->withColumn(ContentI18nTableMap::TITLE, 'CONTENT_TITLE');
 
         // Execute query
         $results = $query->find();
@@ -417,13 +472,7 @@ class SitemapController extends BaseFrontController
                 ->findOne();
 
             if ($image !== null) {
-                $title = ContentI18nQuery::create()
-                    ->filterById($result->getViewId())
-                    ->filterByLocale($locale)
-                    ->select(ContentI18nTableMap::TITLE)
-                    ->findOne();
-
-                $this->generateSitemapImage('content', $image, $title, $sitemap);
+                $this->generateSitemapImage('content', $image, $result->getVirtualColumn('CONTENT_TITLE'), $sitemap);
             }
 
             // Close folder line
@@ -451,11 +500,34 @@ class SitemapController extends BaseFrontController
         );
 
         $join->setJoinType(Criteria::INNER_JOIN);
-
         $query->addJoinObject($join, 'contentJoin');
 
         // Get only visible products
         $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+
+
+        // Join RewritingURL with ContentI18n
+        $joinI18n = new Join();
+
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            ContentI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+        $joinI18n->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_LOCALE',
+            null,
+            ContentI18nTableMap::TABLE_NAME,
+            'LOCALE',
+            null
+        );
+
+        $joinI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinI18n);
     }
 
     /* ------------------ */
