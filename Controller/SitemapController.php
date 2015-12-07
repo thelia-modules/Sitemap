@@ -97,7 +97,7 @@ class SitemapController extends BaseFrontController
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
             <url>
-                <loc></loc>
+                <loc>'.URL::getInstance()->getIndexPage().'</loc>
             </url>'
         ];
 
