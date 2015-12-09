@@ -1,0 +1,157 @@
+{extends file="admin-layout.tpl"}
+
+{block name="no-return-functions"}
+{$admin_current_location = 'modules'}
+{/block}
+
+{block name="page-title"}{intl d="sitemap.bo.default" l='Sitemap images configuration'}{/block}
+
+{block name="check-resource"}admin.module{/block}
+{block name="check-access"}view{/block}
+{block name="check-module"}Sitemap{/block}
+
+{block name="main-content"}
+<div class="container" id="wrapper">
+
+    <ul class="breadcrumb">
+        <li><a href="{url path='/admin'}">{intl l="Home" d="sitemap.bo.default"}</a></li>
+        <li><a href="{url path='/admin/modules'}">{intl l="Modules" d="sitemap.bo.default"}</a></li>
+        <li>{intl l="Sitemap images configuration" d="sitemap.bo.default"}</li>
+    </ul>
+
+    <div class="general-block-decorator">
+
+        <div class="title title-without-tabs">
+            {intl l="Configure sitemap images" d="sitemap.bo.default"}
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                {if $success}
+                <div class="alert alert-success">
+                    {intl l="Configuration correctly saved" d="sitemap.bo.default"}
+                </div>
+                {/if}
+
+                {form name='sitemap_config_form'}
+                <form method="post" action="{url path='/admin/module/Sitemap'}">
+
+                    {form_hidden_fields form=$form}
+
+                    {include "includes/inner-form-toolbar.html" hide_flags=true close_url={url path='/admin/modules'}}
+
+                    <h3>{intl l="Set the same information as in your product image loop" d="sitemap.bo.default"}.</h3>
+
+                    {form_field form=$form field="width"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="width"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="height"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="height"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="quality"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="quality"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="rotation"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="rotation"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="resize_mode"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="resize_mode"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="background_color"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="background_color"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                    {form_field form=$form field="allow_zoom"}
+                    <div class="form-group {if $error}has-error{/if}">
+                        <label class="control-label">
+                            {$label}
+
+                            {form_error form=$form field="allow_zoom"}
+                            <br />
+                            <span class="error">{$message}</span>
+                            {/form_error}
+                        </label>
+
+                        <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                    </div>
+                    {/form_field}
+
+                </form>
+                {/form}
+            </div>
+        </div>
+
+    </div>
+</div>
+{/block}

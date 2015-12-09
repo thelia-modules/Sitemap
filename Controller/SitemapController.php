@@ -3,42 +3,27 @@
 namespace Sitemap\Controller;
 
 use Doctrine\Common\Cache\FilesystemCache;
-use Propel\Runtime\ActiveQuery\Criteria;
-use Propel\Runtime\ActiveQuery\Join;
+use Sitemap\Sitemap;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
-use Thelia\Model\CategoryI18nQuery;
-use Thelia\Model\CategoryImageQuery;
 use Thelia\Model\ConfigQuery;
-use Thelia\Model\ContentI18nQuery;
-use Thelia\Model\ContentImageQuery;
-use Thelia\Model\FolderI18nQuery;
-use Thelia\Model\FolderImageQuery;
 use Thelia\Model\LangQuery;
-use Thelia\Model\Map\CategoryI18nTableMap;
-use Thelia\Model\Map\CategoryTableMap;
-use Thelia\Model\Map\ContentI18nTableMap;
-use Thelia\Model\Map\ContentTableMap;
-use Thelia\Model\Map\FolderI18nTableMap;
-use Thelia\Model\Map\FolderTableMap;
-use Thelia\Model\Map\ProductI18nTableMap;
-use Thelia\Model\Map\ProductTableMap;
-use Thelia\Model\Map\RewritingUrlTableMap;
-use Thelia\Model\ProductI18nQuery;
-use Thelia\Model\ProductImageQuery;
-use Thelia\Model\RewritingUrl;
-use Thelia\Model\RewritingUrlQuery;
 use Thelia\Tools\URL;
 
 /**
  * Class SitemapController
  * @package Sitemap\Controller
- * @autho Etienne Perriere <eperriere@openstudio.fr>
+ * @author Etienne Perriere <eperriere@openstudio.fr>
  */
 class SitemapController extends BaseFrontController
 {
+    use CategorySitemapTrait;
+    use ProductSitemapTrait;
+    use FolderSitemapTrait;
+    use ContentSitemapTrait;
+
     /** Folder name for sitemap cache */
     const SITEMAP_CACHE_DIR = "sitemap";
 
@@ -131,408 +116,6 @@ class SitemapController extends BaseFrontController
     /* ------------------ */
 
     /**
-     * Get categories
-     *
-     * @param $sitemap
-     * @param $locale
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function setSitemapCategories(&$sitemap, $locale)
-    {
-        // Prepare query - get categories URL
-        $query = RewritingUrlQuery::create()
-            ->filterByView('category')
-            ->filterByRedirected(null)
-            ->filterByViewLocale($locale);
-
-        // Join with visible categories
-        self::addJoinCategory($query, $locale);
-
-        // Get categories last update & title
-        $query->withColumn(CategoryTableMap::UPDATED_AT, 'CATEGORY_UPDATE_AT');
-        $query->withColumn(CategoryI18nTableMap::TITLE, 'CATEGORY_TITLE');
-
-        // Execute query
-        $results = $query->find();
-
-        // For each result, use URL, update and image to hydrate XML file
-        /** @var RewritingUrl $result */
-        foreach ($results as $result) {
-
-            // Open new sitemap line & set category URL & update date
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('CATEGORY_UPDATE_AT').'</lastmod>';
-
-            // Handle category image
-            $image = CategoryImageQuery::create()
-                ->filterByCategoryId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('category', $image, $result->getVirtualColumn('CATEGORY_TITLE'), $sitemap);
-            }
-
-            // Close category line
-            $sitemap[] = '            </url>';
-        }
-    }
-
-    /**
-     * Join categories and their URLs
-     *
-     * @param Criteria $query
-     */
-    protected function addJoinCategory(Criteria &$query, $locale)
-    {
-        // Join RewritingURL with Category
-        $join = new Join();
-
-        $join->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            CategoryTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $join->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($join, 'categoryJoin');
-
-        // Get only visible categories
-        $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with CategoryI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            CategoryI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            CategoryI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n, 'categoryI18nJoin');
-    }
-
-    /**
-     * Get products
-     *
-     * @param $sitemap
-     * @param $locale
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function setSitemapProducts(&$sitemap, $locale)
-    {
-        // Prepare query - get products URL
-        $query = RewritingUrlQuery::create()
-            ->filterByView('product')
-            ->filterByRedirected(null)
-            ->filterByViewLocale($locale);
-
-        // Join with visible products
-        self::addJoinProduct($query);
-
-        // Get products last update
-        $query->withColumn(ProductTableMap::UPDATED_AT, 'PRODUCT_UPDATE_AT');
-        $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
-
-        // Execute query
-        $results = $query->find();
-
-        // For each result, use URL and update to hydrate XML file
-        /** @var RewritingUrl $result */
-        foreach ($results as $result) {
-
-            // Open new sitemap line & set product URL & update date
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('PRODUCT_UPDATE_AT').'</lastmod>';
-
-            // Handle product image
-            $image = ProductImageQuery::create()
-                ->filterByProductId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('product', $image, $result->getVirtualColumn('PRODUCT_TITLE'), $sitemap);
-            }
-
-            // Close product line
-            $sitemap[] = '            </url>';
-        }
-    }
-
-    /**
-     * Join products and their URLs
-     *
-     * @param Criteria $query
-     */
-    protected function addJoinProduct(Criteria &$query)
-    {
-        // Join RewritingURL with Product
-        $join = new Join();
-
-        $join->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            ProductTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $join->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($join, 'productJoin');
-
-        // Get only visible products
-        $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with ProductI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            ProductI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            ProductI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n);
-    }
-
-    /**
-     * Get folders
-     *
-     * @param $sitemap
-     * @param $locale
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function setSitemapFolders(&$sitemap, $locale)
-    {
-        // Prepare query - get folders URL
-        $query = RewritingUrlQuery::create()
-            ->filterByView('folder')
-            ->filterByRedirected(null)
-            ->filterByViewLocale($locale);
-
-        // Join with visible folders
-        self::addJoinFolder($query);
-
-        // Get folders last update
-        $query->withColumn(FolderTableMap::UPDATED_AT, 'FOLDER_UPDATE_AT');
-        $query->withColumn(FolderI18nTableMap::TITLE, 'FOLDER_TITLE');
-
-        // Execute query
-        $results = $query->find();
-
-        // For each result, use URL and update to hydrate XML file
-        /** @var RewritingUrl $result */
-        foreach ($results as $result) {
-
-            // Open new sitemap line & set folder URL & update date
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('FOLDER_UPDATE_AT').'</lastmod>';
-
-            // Handle folder image
-            $image = FolderImageQuery::create()
-                ->filterByFolderId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('folder', $image, $result->getVirtualColumn('FOLDER_TITLE'), $sitemap);
-            }
-
-            // Close folder line
-            $sitemap[] = '            </url>';
-        }
-    }
-
-    /**
-     * Join folders and their URLs
-     *
-     * @param Criteria $query
-     */
-    protected function addJoinFolder(Criteria &$query)
-    {
-        // Join RewritingURL with Folder
-        $join = new Join();
-
-        $join->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            FolderTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $join->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($join, 'folderJoin');
-
-        // Get only visible folders
-        $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with FolderI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            FolderI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            FolderI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n);
-    }
-
-    /**
-     * Get contents
-     *
-     * @param $sitemap
-     * @param $locale
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function setSitemapContents(&$sitemap, $locale)
-    {
-        // Prepare query - get contents URL
-        $query = RewritingUrlQuery::create()
-            ->filterByView('content')
-            ->filterByRedirected(null)
-            ->filterByViewLocale($locale);
-
-        // Join with visible contents
-        self::addJoinContent($query);
-
-        // Get contents last update
-        $query->withColumn(ContentTableMap::UPDATED_AT, 'CONTENT_UPDATE_AT');
-        $query->withColumn(ContentI18nTableMap::TITLE, 'CONTENT_TITLE');
-
-        // Execute query
-        $results = $query->find();
-
-        // For each result, use URL and update to hydrate XML file
-        /** @var RewritingUrl $result */
-        foreach ($results as $result) {
-
-            // Open new sitemap line & set content URL & update date
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('CONTENT_UPDATE_AT').'</lastmod>';
-
-            // Handle content image
-            $image = ContentImageQuery::create()
-                ->filterByContentId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('content', $image, $result->getVirtualColumn('CONTENT_TITLE'), $sitemap);
-            }
-
-            // Close folder line
-            $sitemap[] = '            </url>';
-        }
-    }
-
-    /**
-     * Join contents and their URLs
-     *
-     * @param Criteria $query
-     */
-    protected function addJoinContent(Criteria &$query)
-    {
-        // Join RewritingURL with Content
-        $join = new Join();
-
-        $join->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            ContentTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $join->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($join, 'contentJoin');
-
-        // Get only visible products
-        $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with ContentI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            ContentI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            ContentI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n);
-    }
-
-    /* ------------------ */
-
-    /**
      * @param $type
      * @param $image
      * @param $title
@@ -543,11 +126,13 @@ class SitemapController extends BaseFrontController
         $event = new ImageEvent();
 
         $event
-            ->setWidth(560)
-            ->setHeight(408)
-            ->setQuality(10)
-            ->setRotation(0)
-            ->setResizeMode(\Thelia\Action\Image::EXACT_RATIO_WITH_BORDERS);
+            ->setWidth(Sitemap::getConfigValue('width', 560))
+            ->setHeight(Sitemap::getConfigValue('height', 445))
+            ->setQuality(Sitemap::getConfigValue('quality', 75))
+            ->setRotation(Sitemap::getConfigValue('rotation', 0))
+            ->setResizeMode(Sitemap::getConfigValue('resize_mode', \Thelia\Action\Image::EXACT_RATIO_WITH_BORDERS))
+            ->setBackgroundColor(Sitemap::getConfigValue('background_color'))
+            ->setAllowZoom(Sitemap::getConfigValue('allow_zoom', false));
 
         // Put source image file path
         $source_filepath = sprintf("%s%s/%s/%s",
@@ -574,11 +159,13 @@ class SitemapController extends BaseFrontController
                 </image:image>';
     }
 
+    /* ------------------ */
+
     /**
      * @param $locale
      * @return bool     true if the language is used, otherwise false
      */
-    private function checkLang($locale)
+    protected function checkLang($locale)
     {
         // Load locales
         $locale = LangQuery::create()

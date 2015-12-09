@@ -19,4 +19,8 @@ composer require thelia/sitemap-module:~1.0
 
 ## Usage
 
-Just activate the module and it will be used to generate sitemap when going on http://youSite.com/sitemap
+Configure the module with the same information as in you product image loop.
+
+The sitemap will be filled with all your categories, products, folders, contents and product images URLs.
+
+The module will be used to generate sitemap when going on http://yourSite.com/sitemap.
