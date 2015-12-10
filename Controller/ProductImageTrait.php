@@ -5,9 +5,9 @@ namespace Sitemap\Controller;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Thelia\Model\Map\ProductI18nTableMap;
+use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
-use Thelia\Model\ProductImageQuery;
 use Thelia\Model\RewritingUrl;
 use Thelia\Model\RewritingUrlQuery;
 use Thelia\Tools\URL;
@@ -30,13 +30,15 @@ trait ProductImageTrait
         // Join with visible products
         self::addJoinProductI18n($query);
 
-        // Get products title
+        // Get products title & image file name
         $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
+        $query->addDescendingOrderByColumn(ProductImageTableMap::POSITION);
+        $query->withColumn(ProductImageTableMap::FILE, 'PRODUCT_FILE');
 
         // Execute query
         $results = $query->find();
 
-        // For each result, use URL to hydrate XML file
+        // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
@@ -45,15 +47,8 @@ trait ProductImageTrait
             <url>
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>';
 
-            // Handle product image
-            $image = ProductImageQuery::create()
-                ->filterByProductId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('product', $image, $result->getVirtualColumn('PRODUCT_TITLE'), $sitemap);
-            }
+            // Generate image data
+            $this->generateSitemapImage('product', $result->getVirtualColumn('PRODUCT_FILE'), $result->getVirtualColumn('PRODUCT_TITLE'), $sitemap);
 
             // Close product line
             $sitemap[] = '            </url>';
@@ -67,7 +62,7 @@ trait ProductImageTrait
      */
     protected function addJoinProductI18n(Criteria &$query)
     {
-        // Join RewritingURL with Product
+        // Join RewritingURL with Product to have only visible products
         $join = new Join();
 
         $join->addExplicitCondition(
@@ -84,7 +79,7 @@ trait ProductImageTrait
 
         $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
 
-        // Join RewritingURL with ProductI18n
+        // Join RewritingURL with ProductI18n to have product title for it's image
         $joinI18n = new Join();
 
         $joinI18n->addExplicitCondition(
@@ -106,5 +101,23 @@ trait ProductImageTrait
 
         $joinI18n->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($joinI18n);
+
+
+        // Join RewritingURL with ProductImage to have image file
+        $joinImage = new Join();
+
+        $joinImage->addExplicitCondition(
+            RewritingUrlTableMap::TABLE_NAME,
+            'VIEW_ID',
+            null,
+            ProductImageTableMap::TABLE_NAME,
+            'PRODUCT_ID',
+            null
+        );
+
+        $joinImage->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinImage, 'productImageJoin');
+
+        $query->addJoinCondition('productImageJoin', ProductImageTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
     }
 }

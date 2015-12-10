@@ -4,8 +4,6 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
-use Thelia\Model\FolderImageQuery;
-use Thelia\Model\Map\FolderI18nTableMap;
 use Thelia\Model\Map\FolderTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
@@ -39,12 +37,11 @@ trait FolderSitemapTrait
 
         // Get folders last update
         $query->withColumn(FolderTableMap::UPDATED_AT, 'FOLDER_UPDATE_AT');
-        $query->withColumn(FolderI18nTableMap::TITLE, 'FOLDER_TITLE');
 
         // Execute query
         $results = $query->find();
 
-        // For each result, use URL and update to hydrate XML file
+        // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
@@ -54,22 +51,6 @@ trait FolderSitemapTrait
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
                 <lastmod>'.$result->getVirtualColumn('FOLDER_UPDATE_AT').'</lastmod>
             </url>';
-
-            /* Can be used later to handle folders images
-
-            // Handle folder image
-            $image = FolderImageQuery::create()
-                ->filterByFolderId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('folder', $image, $result->getVirtualColumn('FOLDER_TITLE'), $sitemap);
-            }
-
-            // Close folder line
-            $sitemap[] = '            </url>';
-            */
         }
     }
 
@@ -80,7 +61,7 @@ trait FolderSitemapTrait
      */
     protected function addJoinFolder(Criteria &$query)
     {
-        // Join RewritingURL with Folder
+        // Join RewritingURL with Folder to have only visible folders
         $join = new Join();
 
         $join->addExplicitCondition(
@@ -97,29 +78,5 @@ trait FolderSitemapTrait
 
         // Get only visible folders
         $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with FolderI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            FolderI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            FolderI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n);
     }
 }

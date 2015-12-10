@@ -4,8 +4,6 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
-use Thelia\Model\ContentImageQuery;
-use Thelia\Model\Map\ContentI18nTableMap;
 use Thelia\Model\Map\ContentTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
@@ -39,12 +37,11 @@ trait ContentSitemapTrait
 
         // Get contents last update
         $query->withColumn(ContentTableMap::UPDATED_AT, 'CONTENT_UPDATE_AT');
-        $query->withColumn(ContentI18nTableMap::TITLE, 'CONTENT_TITLE');
 
         // Execute query
         $results = $query->find();
 
-        // For each result, use URL and update to hydrate XML file
+        // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
@@ -54,22 +51,6 @@ trait ContentSitemapTrait
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
                 <lastmod>'.$result->getVirtualColumn('CONTENT_UPDATE_AT').'</lastmod>
             </url>';
-
-            /* Can be used later to handle contents images
-
-            // Handle content image
-            $image = ContentImageQuery::create()
-                ->filterByContentId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('content', $image, $result->getVirtualColumn('CONTENT_TITLE'), $sitemap);
-            }
-
-            // Close folder line
-            $sitemap[] = '            </url>';
-            */
         }
     }
 
@@ -80,7 +61,7 @@ trait ContentSitemapTrait
      */
     protected function addJoinContent(Criteria &$query)
     {
-        // Join RewritingURL with Content
+        // Join RewritingURL with Content to have only visible contents
         $join = new Join();
 
         $join->addExplicitCondition(
@@ -97,30 +78,6 @@ trait ContentSitemapTrait
 
         // Get only visible products
         $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with ContentI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            ContentI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            ContentI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n);
     }
 
 }

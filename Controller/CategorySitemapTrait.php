@@ -4,8 +4,6 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
-use Thelia\Model\CategoryImageQuery;
-use Thelia\Model\Map\CategoryI18nTableMap;
 use Thelia\Model\Map\CategoryTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
@@ -37,14 +35,13 @@ trait CategorySitemapTrait
         // Join with visible categories
         self::addJoinCategory($query, $locale);
 
-        // Get categories last update & title
+        // Get categories last update
         $query->withColumn(CategoryTableMap::UPDATED_AT, 'CATEGORY_UPDATE_AT');
-        $query->withColumn(CategoryI18nTableMap::TITLE, 'CATEGORY_TITLE');
 
         // Execute query
         $results = $query->find();
 
-        // For each result, use URL, update and image to hydrate XML file
+        // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
@@ -54,22 +51,6 @@ trait CategorySitemapTrait
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
                 <lastmod>'.$result->getVirtualColumn('CATEGORY_UPDATE_AT').'</lastmod>
             </url>';
-
-            /* Can be used later to handle categories images
-
-            // Handle category image
-            $image = CategoryImageQuery::create()
-                ->filterByCategoryId($result->getViewId())
-                ->orderByPosition(Criteria::ASC)
-                ->findOne();
-
-            if ($image !== null) {
-                $this->generateSitemapImage('category', $image, $result->getVirtualColumn('CATEGORY_TITLE'), $sitemap);
-            }
-
-            // Close category line
-            $sitemap[] = '            </url>';
-            */
         }
     }
 
@@ -80,7 +61,7 @@ trait CategorySitemapTrait
      */
     protected function addJoinCategory(Criteria &$query)
     {
-        // Join RewritingURL with Category
+        // Join RewritingURL with Category to have only visible categories
         $join = new Join();
 
         $join->addExplicitCondition(
@@ -97,29 +78,5 @@ trait CategorySitemapTrait
 
         // Get only visible categories
         $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
-
-        // Join RewritingURL with CategoryI18n
-        $joinI18n = new Join();
-
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_ID',
-            null,
-            CategoryI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-        $joinI18n->addExplicitCondition(
-            RewritingUrlTableMap::TABLE_NAME,
-            'VIEW_LOCALE',
-            null,
-            CategoryI18nTableMap::TABLE_NAME,
-            'LOCALE',
-            null
-        );
-
-        $joinI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinI18n, 'categoryI18nJoin');
     }
 }

@@ -14,7 +14,7 @@ Generate a sitemap faster than Thelia default one.
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/sitemap-module:~1.1
+composer require thelia/sitemap-module:~1.2
 ```
 
 ## Usage

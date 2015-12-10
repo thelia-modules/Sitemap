@@ -183,11 +183,11 @@ class SitemapController extends BaseFrontController
 
     /**
      * @param $type
-     * @param $image
+     * @param $file
      * @param $title
      * @param $sitemap
      */
-    protected function generateSitemapImage($type, $image, $title, &$sitemap)
+    protected function generateSitemapImage($type, $file, $title, &$sitemap)
     {
         $event = new ImageEvent();
 
@@ -205,7 +205,7 @@ class SitemapController extends BaseFrontController
             THELIA_ROOT,
             ConfigQuery::read('images_library_path', 'local/media/images'),
             $type,
-            $image->getFile()
+            $file
         );
 
         $event->setSourceFilepath($source_filepath);
