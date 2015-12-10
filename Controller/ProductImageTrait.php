@@ -7,25 +7,19 @@ use Propel\Runtime\ActiveQuery\Join;
 use Thelia\Model\Map\ProductI18nTableMap;
 use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
+use Thelia\Model\ProductImageQuery;
 use Thelia\Model\RewritingUrl;
 use Thelia\Model\RewritingUrlQuery;
 use Thelia\Tools\URL;
 
 /**
- * Trait ProductSitemapTrait
+ * Class ProductImageTrait
  * @package Sitemap\Controller
  * @author Etienne Perriere <eperriere@openstudio.fr>
  */
-trait ProductSitemapTrait
+trait ProductImageTrait
 {
-    /**
-     * Get products
-     *
-     * @param $sitemap
-     * @param $locale
-     * @throws \Propel\Runtime\Exception\PropelException
-     */
-    protected function setSitemapProducts(&$sitemap, $locale)
+    protected function setSitemapProductImages(&$sitemap, $locale)
     {
         // Prepare query - get products URL
         $query = RewritingUrlQuery::create()
@@ -34,27 +28,23 @@ trait ProductSitemapTrait
             ->filterByViewLocale($locale);
 
         // Join with visible products
-        self::addJoinProduct($query);
+        self::addJoinProductI18n($query);
 
-        // Get products last update & title
-        $query->withColumn(ProductTableMap::UPDATED_AT, 'PRODUCT_UPDATE_AT');
+        // Get products title
         $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
 
         // Execute query
         $results = $query->find();
 
-        // For each result, use URL and update to hydrate XML file
+        // For each result, use URL to hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
-            // Open new sitemap line & set product URL & update date
+            // Open new sitemap line & set product URL
             $sitemap[] = '
             <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('PRODUCT_UPDATE_AT').'</lastmod>
-            </url>';
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>';
 
-            /*
             // Handle product image
             $image = ProductImageQuery::create()
                 ->filterByProductId($result->getViewId())
@@ -67,7 +57,6 @@ trait ProductSitemapTrait
 
             // Close product line
             $sitemap[] = '            </url>';
-            */
         }
     }
 
@@ -76,7 +65,7 @@ trait ProductSitemapTrait
      *
      * @param Criteria $query
      */
-    protected function addJoinProduct(Criteria &$query)
+    protected function addJoinProductI18n(Criteria &$query)
     {
         // Join RewritingURL with Product
         $join = new Join();
@@ -93,9 +82,7 @@ trait ProductSitemapTrait
         $join->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($join, 'productJoin');
 
-        // Get only visible products
         $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
-
 
         // Join RewritingURL with ProductI18n
         $joinI18n = new Join();

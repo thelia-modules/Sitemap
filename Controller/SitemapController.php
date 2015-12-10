@@ -24,20 +24,46 @@ class SitemapController extends BaseFrontController
     use FolderSitemapTrait;
     use ContentSitemapTrait;
 
+    use ProductImageTrait;
+
     /** Folder name for sitemap cache */
     const SITEMAP_CACHE_DIR = "sitemap";
 
     /** Key prefix for sitemap cache */
     const SITEMAP_CACHE_KEY = "sitemap";
 
+    /** Folder name for sitemap image cache */
+    const SITEMAP_IMAGE_CACHE_DIR = "sitemap-image";
+
+    /** Key prefix for sitemap image cache */
+    const SITEMAP_IMAGE_CACHE_KEY = "sitemap-image";
+
     protected $useFallbackTemplate = true;
 
     /**
-     * Check if cache sitemap can be used or generate a new one and cache it
-     *
-     * @return Response
+     * Generate sitemap
      */
     public function generateAction()
+    {
+        return $this->generateSitemap(self::SITEMAP_CACHE_KEY, self::SITEMAP_CACHE_DIR);
+    }
+
+    /**
+     * Generate sitemap image
+     */
+    public function generateImageAction()
+    {
+        return $this->generateSitemap(self::SITEMAP_IMAGE_CACHE_KEY, self::SITEMAP_IMAGE_CACHE_DIR);
+    }
+
+    /**
+     * Check if cached sitemap can be used or generate a new one and cache it
+     *
+     * @param $cacheKey
+     * @param $cacheDirName
+     * @return Response
+     */
+    public function generateSitemap($cacheKey, $cacheDirName)
     {
         // Get and check locale
         $locale = $this->getSession()->getLang()->getLocale();
@@ -50,8 +76,8 @@ class SitemapController extends BaseFrontController
 
         // Get sitemap cache information
         $sitemapContent = false;
-        $cacheDir = $this->getCacheDir();
-        $cacheKey = self::SITEMAP_CACHE_KEY . $locale;
+        $cacheDir = $this->getCacheDir($cacheDirName);
+        $cacheKey .= $locale;
         $cacheExpire = intval(ConfigQuery::read("sitemap_ttl", '7200')) ?: 7200;
         $cacheDriver = new FilesystemCache($cacheDir);
 
@@ -65,8 +91,20 @@ class SitemapController extends BaseFrontController
 
         // If not in cache, generate and cache it
         if (false === $sitemapContent){
-            // Generate sitemap function
-            $sitemap = $this->generateSitemap($locale);
+
+            // Check if we generate the standard sitemap or the sitemap image
+            switch ($cacheDirName) {
+                // Image
+                case self::SITEMAP_IMAGE_CACHE_DIR:
+                    $sitemap = $this->hydrateSitemapImage($locale);
+                    break;
+
+                // Standard
+                case self::SITEMAP_CACHE_DIR:
+                default:
+                    $sitemap = $this->hydrateSitemap($locale);
+                    break;
+            }
 
             $sitemapContent = implode("\n", $sitemap);
 
@@ -82,20 +120,21 @@ class SitemapController extends BaseFrontController
         return $response;
     }
 
+    /* ------------------ */
+
     /**
      * Build sitemap array
      *
      * @param $locale
      * @return array
      */
-    protected function generateSitemap($locale)
+    protected function hydrateSitemap($locale)
     {
         // Begin sitemap
         $sitemap = ['<?xml version="1.0" encoding="UTF-8"?>
         <!-- Generated on : '. date('Y-m-d H:i:s') .' -->
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
             <url>
                 <loc>'.URL::getInstance()->getIndexPage().'</loc>
             </url>'
@@ -108,6 +147,33 @@ class SitemapController extends BaseFrontController
         $this->setSitemapContents($sitemap, $locale);
 
         // End sitemap
+        $sitemap[] = "\t".'</urlset>';
+
+        return $sitemap;
+    }
+
+    /**
+     * Build sitemap image array
+     *
+     * @param $locale
+     * @return array
+     */
+    protected function hydrateSitemapImage($locale)
+    {
+        // Begin sitemap image
+        $sitemap = ['<?xml version="1.0" encoding="UTF-8"?>
+        <!-- Generated on : '. date('Y-m-d H:i:s') .' -->
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+            <url>
+                <loc>'.URL::getInstance()->getIndexPage().'</loc>
+            </url>'
+        ];
+
+        // Hydrate sitemap image
+        $this->setSitemapProductImages($sitemap, $locale);
+
+        // End sitemap image
         $sitemap[] = "\t".'</urlset>';
 
         return $sitemap;
@@ -177,13 +243,14 @@ class SitemapController extends BaseFrontController
     /**
      * Get the cache directory for sitemap
      *
+     * @param $cacheDirName
      * @return mixed|string
      */
-    protected function getCacheDir()
+    protected function getCacheDir($cacheDirName)
     {
         $cacheDir = $this->container->getParameter("kernel.cache_dir");
         $cacheDir = rtrim($cacheDir, '/');
-        $cacheDir .= '/' . self::SITEMAP_CACHE_DIR . '/';
+        $cacheDir .= '/' . $cacheDirName . '/';
 
         return $cacheDir;
     }
