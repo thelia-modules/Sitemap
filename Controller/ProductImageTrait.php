@@ -33,6 +33,7 @@ trait ProductImageTrait
         // Get products title & image file name
         $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
         $query->addDescendingOrderByColumn(ProductImageTableMap::POSITION);
+        $query->addGroupByColumn(RewritingUrlTableMap::VIEW_ID);
         $query->withColumn(ProductImageTableMap::FILE, 'PRODUCT_FILE');
 
         // Execute query
