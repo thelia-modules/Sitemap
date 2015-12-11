@@ -49,7 +49,7 @@ trait ContentSitemapTrait
             $sitemap[] = '
             <url>
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('CONTENT_UPDATE_AT').'</lastmod>
+                <lastmod>'.date('c', strtotime($result->getVirtualColumn('CONTENT_UPDATE_AT'))).'</lastmod>
             </url>';
         }
     }

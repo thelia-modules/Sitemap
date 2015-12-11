@@ -192,8 +192,8 @@ class SitemapController extends BaseFrontController
         $event = new ImageEvent();
 
         $event
-            ->setWidth(Sitemap::getConfigValue('width', 560))
-            ->setHeight(Sitemap::getConfigValue('height', 445))
+            ->setWidth(Sitemap::getConfigValue('width'))
+            ->setHeight(Sitemap::getConfigValue('height'))
             ->setQuality(Sitemap::getConfigValue('quality', 75))
             ->setRotation(Sitemap::getConfigValue('rotation', 0))
             ->setResizeMode(Sitemap::getConfigValue('resize_mode', \Thelia\Action\Image::EXACT_RATIO_WITH_BORDERS))

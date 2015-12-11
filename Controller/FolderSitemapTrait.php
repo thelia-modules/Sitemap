@@ -49,7 +49,7 @@ trait FolderSitemapTrait
             $sitemap[] = '
             <url>
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.$result->getVirtualColumn('FOLDER_UPDATE_AT').'</lastmod>
+                <lastmod>'.date('c', strtotime($result->getVirtualColumn('FOLDER_UPDATE_AT'))).'</lastmod>
             </url>';
         }
     }
