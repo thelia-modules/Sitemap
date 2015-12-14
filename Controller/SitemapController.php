@@ -185,20 +185,21 @@ class SitemapController extends BaseFrontController
      * @param $type
      * @param $file
      * @param $title
+     * @param $configValues
      * @param $sitemap
      */
-    protected function generateSitemapImage($type, $file, $title, &$sitemap)
+    protected function generateSitemapImage($type, $file, $title, $configValues, &$sitemap)
     {
         $event = new ImageEvent();
 
         $event
-            ->setWidth(Sitemap::getConfigValue('width'))
-            ->setHeight(Sitemap::getConfigValue('height'))
-            ->setQuality(Sitemap::getConfigValue('quality', 75))
-            ->setRotation(Sitemap::getConfigValue('rotation', 0))
-            ->setResizeMode(Sitemap::getConfigValue('resize_mode', \Thelia\Action\Image::EXACT_RATIO_WITH_BORDERS))
-            ->setBackgroundColor(Sitemap::getConfigValue('background_color'))
-            ->setAllowZoom(Sitemap::getConfigValue('allow_zoom', false));
+            ->setWidth($configValues['width'])
+            ->setHeight($configValues['height'])
+            ->setQuality($configValues['quality'])
+            ->setRotation($configValues['rotation'])
+            ->setResizeMode($configValues['resizeMode'])
+            ->setBackgroundColor($configValues['bgColor'])
+            ->setAllowZoom($configValues['allowZoom']);
 
         // Put source image file path
         $source_filepath = sprintf("%s%s/%s/%s",

@@ -4,6 +4,7 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
+use Sitemap\Sitemap;
 use Thelia\Model\Map\ProductI18nTableMap;
 use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\Map\ProductTableMap;
@@ -39,6 +40,16 @@ trait ProductImageTrait
         // Execute query
         $results = $query->find();
 
+        // Get image generation configuration values
+        $configValues = [];
+        $configValues['width'] = Sitemap::getConfigValue('width');
+        $configValues['height'] = Sitemap::getConfigValue('height');
+        $configValues['quality'] = Sitemap::getConfigValue('quality', 75);
+        $configValues['rotation'] = Sitemap::getConfigValue('rotation', 0);
+        $configValues['resizeMode'] = Sitemap::getConfigValue('resize_mode', \Thelia\Action\Image::EXACT_RATIO_WITH_BORDERS);
+        $configValues['bgColor'] = Sitemap::getConfigValue('background_color');
+        $configValues['allowZoom'] = Sitemap::getConfigValue('allow_zoom', false);
+
         // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
@@ -49,7 +60,7 @@ trait ProductImageTrait
                 <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>';
 
             // Generate image data
-            $this->generateSitemapImage('product', $result->getVirtualColumn('PRODUCT_FILE'), $result->getVirtualColumn('PRODUCT_TITLE'), $sitemap);
+            $this->generateSitemapImage('product', $result->getVirtualColumn('PRODUCT_FILE'), $result->getVirtualColumn('PRODUCT_TITLE'), $configValues, $sitemap);
 
             // Close product line
             $sitemap[] = '            </url>';

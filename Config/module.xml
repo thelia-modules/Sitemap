@@ -4,16 +4,16 @@
         xsi:schemaLocation="http://thelia.net/schema/dic/module http://thelia.net/schema/dic/module/module-2_2.xsd">
     <fullnamespace>Sitemap\Sitemap</fullnamespace>
     <descriptive locale="en_US">
-        <title>Create a sitemap file more quickly</title>
+        <title>Create sitemap and sitemap image files more quickly</title>
     </descriptive>
     <descriptive locale="fr_FR">
-        <title>Génère un fichier sitemap plus rapidement</title>
+        <title>Génère les fichiers sitemap et sitemap image plus rapidement</title>
     </descriptive>
     <languages>
         <language>en_US</language>
         <language>fr_FR</language>
     </languages>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <authors>
         <author>
             <name>Etienne Perriere</name>
