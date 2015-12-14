@@ -1,6 +1,6 @@
 # Sitemap
 
-Generate a sitemap faster than Thelia default one.
+Generate sitemaps faster than Thelia default ones.
 
 ## Installation
 
@@ -14,13 +14,17 @@ Generate a sitemap faster than Thelia default one.
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/sitemap-module:~1.2
+composer require thelia/sitemap-module:~1.3
 ```
 
 ## Usage
 
 Configure the module with the same information as in you product image loop.
 
-The sitemap will be filled with all your categories, products, folders, contents and product images URLs.
+If you have a lot of products with images, change the timeout in the configuration. **However, be aware** that it may not work depending on your server.
 
-The module will be used to generate sitemap when going on http://yourSite.com/sitemap and the sitemap image on http://yourSite.com/sitemap-image.
+The sitemap will be filled with all your categories, products, folders and contents URLs, depending on the language.
+
+The sitemap-image will be filled with all your product images (1 by product) URLs, depending on the language.
+
+The module will be used to generate sitemap when going on http://yourSite.com/sitemap and the sitemap-image on http://yourSite.com/sitemap-image.

@@ -21,18 +21,36 @@ class SitemapConfigController extends BaseAdminController
             return $response;
         }
 
-        // Get current edition language locale
-        $locale = $this->getCurrentEditionLocale();
+        // Get resize mode name
+        switch (Sitemap::getConfigValue('resize_mode')) {
+            case 1:
+                $resizeMode = 'borders';
+                break;
 
+            case 2:
+                $resizeMode = 'crop';
+                break;
+
+            case 3:
+                $resizeMode = 'none';
+                break;
+
+            default:
+                $resizeMode = '';
+                break;
+        }
+
+        // Build form
         $form = $this->createForm(
             "sitemap_config_form",
             'form',
             [
+                'timeout' => Sitemap::getConfigValue('timeout'),
                 'width' => Sitemap::getConfigValue('width'),
                 'height' => Sitemap::getConfigValue('height'),
                 'quality' => Sitemap::getConfigValue('quality'),
                 'rotation' => Sitemap::getConfigValue('rotation'),
-                'resize_mode' => Sitemap::getConfigValue('resize_mode'),
+                'resize_mode' => $resizeMode,
                 'background_color' => Sitemap::getConfigValue('background_color'),
                 'allow_zoom' => Sitemap::getConfigValue('allow_zoom')
             ]
@@ -82,13 +100,14 @@ class SitemapConfigController extends BaseAdminController
             }
 
             // Save data
-            Sitemap::setConfigValue('width', $data["width"]);
-            Sitemap::setConfigValue('height', $data["height"]);
-            Sitemap::setConfigValue('quality', $data["quality"]);
-            Sitemap::setConfigValue('rotation', $data["rotation"]);
+            Sitemap::setConfigValue('timeout', $data['timeout']);
+            Sitemap::setConfigValue('width', $data['width']);
+            Sitemap::setConfigValue('height', $data['height']);
+            Sitemap::setConfigValue('quality', $data['quality']);
+            Sitemap::setConfigValue('rotation', $data['rotation']);
             Sitemap::setConfigValue('resize_mode', $resizeMode);
-            Sitemap::setConfigValue('background_color', $data["background_color"]);
-            Sitemap::setConfigValue('allow_zoom', $data["allow_zoom"]);
+            Sitemap::setConfigValue('background_color', $data['background_color']);
+            Sitemap::setConfigValue('allow_zoom', $data['allow_zoom']);
 
         } catch (FormValidationException $ex) {
             // Invalid data entered

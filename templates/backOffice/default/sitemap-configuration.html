@@ -42,6 +42,23 @@
 
                     <h3>{intl l="Set the same information as in your product image loop" d="sitemap.bo.default"}.</h3>
 
+                    {form_field form=$form field="timeout"}
+                        <div class="form-group {if $error}has-error{/if}">
+                            <label class="control-label">
+                                {$label}
+
+                                {form_error form=$form field="timeout"}
+                                    <br />
+                                    <span class="error">{$message}</span>
+                                {/form_error}
+                            </label>
+
+                            <p>{intl l='<b>Warning!</b> Only use it if you have so many images that the sitemap-image can\'t be generated because of timeout.' d='sitemap.bo.default'}</p>
+                            <p>{intl l='Depending on your server, this may have no effect.'}</p>
+                            <input type="text" class="form-control" name="{$name}" value="{$value}" />
+                        </div>
+                    {/form_field}
+
                     {form_field form=$form field="width"}
                     <div class="form-group {if $error}has-error{/if}">
                         <label class="control-label">

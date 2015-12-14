@@ -23,6 +23,11 @@ class SitemapConfigForm extends BaseForm
     {
         $this->formBuilder
             ->add(
+                'timeout',
+                'number',
+                ['label' => $this->translator->trans('Script timeout (in seconds) for images generation (default: 30)', [], 'sitemap.fo.default')]
+            )
+            ->add(
                 'width',
                 'text',
                 ['label' => $this->translator->trans('Image width', [], 'sitemap.fo.default')]

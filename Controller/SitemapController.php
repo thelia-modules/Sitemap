@@ -3,7 +3,6 @@
 namespace Sitemap\Controller;
 
 use Doctrine\Common\Cache\FilesystemCache;
-use Sitemap\Sitemap;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -222,7 +221,7 @@ class SitemapController extends BaseFrontController
         $sitemap[] = '
                 <image:image>
                     <image:loc>'.$event->getFileUrl().'</image:loc>
-                    <image:title>'.$title.'</image:title>
+                    <image:title>'.htmlspecialchars($title).'</image:title>
                 </image:image>';
     }
 

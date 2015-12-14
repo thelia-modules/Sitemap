@@ -22,6 +22,9 @@ trait ProductImageTrait
 {
     protected function setSitemapProductImages(&$sitemap, $locale)
     {
+        // Change timeout for this script
+        ini_set('max_execution_time', Sitemap::getConfigValue('timeout', 30));
+
         // Prepare query - get products URL
         $query = RewritingUrlQuery::create()
             ->filterByView('product')
