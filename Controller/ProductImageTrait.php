@@ -11,7 +11,6 @@ use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
 use Thelia\Model\RewritingUrlQuery;
-use Thelia\Tools\URL;
 
 /**
  * Class ProductImageTrait
@@ -57,16 +56,8 @@ trait ProductImageTrait
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
 
-            // Open new sitemap line & set product URL
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>';
-
             // Generate image data
-            $this->generateSitemapImage('product', $result->getVirtualColumn('PRODUCT_FILE'), $result->getVirtualColumn('PRODUCT_TITLE'), $configValues, $sitemap);
-
-            // Close product line
-            $sitemap[] = '            </url>';
+            $this->generateSitemapImage('product', $result, $configValues, $sitemap);
         }
     }
 

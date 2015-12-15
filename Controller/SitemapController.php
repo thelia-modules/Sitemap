@@ -9,6 +9,7 @@ use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\LangQuery;
+use Thelia\Model\RewritingUrl;
 use Thelia\Tools\URL;
 
 /**
@@ -182,12 +183,11 @@ class SitemapController extends BaseFrontController
 
     /**
      * @param $type
-     * @param $file
-     * @param $title
+     * @param RewritingUrl $result
      * @param $configValues
      * @param $sitemap
      */
-    protected function generateSitemapImage($type, $file, $title, $configValues, &$sitemap)
+    protected function generateSitemapImage($type, $result, $configValues, &$sitemap)
     {
         $event = new ImageEvent();
 
@@ -205,7 +205,7 @@ class SitemapController extends BaseFrontController
             THELIA_ROOT,
             ConfigQuery::read('images_library_path', 'local/media/images'),
             $type,
-            $file
+            $result->getVirtualColumn('PRODUCT_FILE')
         );
 
         $event->setSourceFilepath($source_filepath);
@@ -214,15 +214,19 @@ class SitemapController extends BaseFrontController
         try {
             // Dispatch image processing event
             $this->dispatch(TheliaEvents::IMAGE_PROCESS, $event);
-        } catch (\Exception $ex) {
-        }
 
-        // Set image path in the sitemap file
-        $sitemap[] = '
+            // New sitemap image entry
+            $sitemap[] = '
+            <url>
+                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
                 <image:image>
                     <image:loc>'.$event->getFileUrl().'</image:loc>
-                    <image:title>'.htmlspecialchars($title).'</image:title>
-                </image:image>';
+                    <image:title>'.htmlspecialchars($result->getVirtualColumn('PRODUCT_TITLE')).'</image:title>
+                </image:image>
+            </url>';
+
+        } catch (\Exception $ex) {
+        }
     }
 
     /* ------------------ */
