@@ -25,42 +25,42 @@ class SitemapConfigForm extends BaseForm
             ->add(
                 'timeout',
                 'number',
-                ['label' => $this->translator->trans('Script timeout (in seconds) for images generation (default: 30)', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Script timeout (in seconds) for images generation (default: 30)', [], 'sitemap')]
             )
             ->add(
                 'width',
                 'text',
-                ['label' => $this->translator->trans('Image width', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image width', [], 'sitemap')]
             )
             ->add(
                 'height',
                 'text',
-                ['label' => $this->translator->trans('Image height', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image height', [], 'sitemap')]
             )
             ->add(
                 'quality',
                 'text',
-                ['label' => $this->translator->trans('Image quality', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image quality', [], 'sitemap')]
             )
             ->add(
                 'rotation',
                 'text',
-                ['label' => $this->translator->trans('Image rotation', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image rotation', [], 'sitemap')]
             )
             ->add(
                 'resize_mode',
                 'text',
-                ['label' => $this->translator->trans('Image resize mode ([borders] / crop / none)', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image resize mode ([borders] / crop / none)', [], 'sitemap')]
             )
             ->add(
                 'background_color',
                 'text',
-                ['label' => $this->translator->trans('Image background color', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Image background color', [], 'sitemap')]
             )
             ->add(
                 'allow_zoom',
                 'text',
-                ['label' => $this->translator->trans('Allow image zoom ([false] / true)', [], 'sitemap.fo.default')]
+                ['label' => $this->translator->trans('Allow image zoom ([false] / true)', [], 'sitemap')]
             )
         ;
     }
