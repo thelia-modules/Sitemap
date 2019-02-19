@@ -4,6 +4,8 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
+use Sitemap\Sitemap;
+use Thelia\Model\Map\ContentFolderTableMap;
 use Thelia\Model\Map\FolderTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
@@ -34,6 +36,10 @@ trait FolderSitemapTrait
 
         // Join with visible folders
         self::addJoinFolder($query);
+
+        if (Sitemap::getConfigValue('exclude_empty_folder') == 1) {
+            self::addJoinFolderCheckNotEmpty($query);
+        }
 
         // Get folders last update
         $query->withColumn(FolderTableMap::UPDATED_AT, 'FOLDER_UPDATE_AT');
@@ -78,5 +84,38 @@ trait FolderSitemapTrait
 
         // Get only visible folders
         $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+    }
+
+    protected function addJoinFolderCheckNotEmpty(Criteria &$query)
+    {
+        $folderChildJoin = new Join();
+        $folderChildJoin->addExplicitCondition(
+            FolderTableMap::TABLE_NAME,
+            'ID',
+            null,
+            FolderTableMap::TABLE_NAME,
+            'PARENT',
+            'folder_folder_child'
+        );
+
+        $folderChildJoin->setJoinType(Criteria::LEFT_JOIN);
+        $query->addJoinObject($folderChildJoin, 'folderFolderChildJoin');
+
+
+        $contentChildJoin = new Join();
+        $contentChildJoin->addExplicitCondition(
+            FolderTableMap::TABLE_NAME,
+            'ID',
+            null,
+            ContentFolderTableMap::TABLE_NAME,
+            'FOLDER_ID',
+            'folder_content_child'
+        );
+
+        $contentChildJoin->setJoinType(Criteria::LEFT_JOIN);
+        $query->addJoinObject($contentChildJoin, 'folderContentChildJoin');
+
+        $query->where('(folder_folder_child.id IS NOT NULL || folder_content_child.content_id IS NOT NULL)');
+        $query->addGroupByColumn('ID');
     }
 }

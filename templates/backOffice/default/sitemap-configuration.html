@@ -20,11 +20,6 @@
     </ul>
 
     <div class="general-block-decorator">
-
-        <div class="title title-without-tabs">
-            {intl l="Configure sitemap images" d="sitemap.bo.default"}
-        </div>
-
         <div class="row">
             <div class="col-md-12">
                 {if $success}
@@ -39,8 +34,39 @@
                     {form_hidden_fields form=$form}
 
                     {include "includes/inner-form-toolbar.html" hide_flags=true close_url={url path='/admin/modules'}}
+                    <div class="title title-without-tabs">
+                        <h2>{intl l="Configure sitemap" d="sitemap.bo.default"}</h2>
+                    </div>
 
-                    <h3>{intl l="Set the same information as in your product image loop" d="sitemap.bo.default"}.</h3>
+                    {form_field form=$form field="exclude_empty_category"}
+                        <div class="{if $error}has-error{/if}">
+                            {form_error form=$form field="width"}
+                                <span class="error">{$message}</span>
+                            {/form_error}
+                            <label for="{$name}">
+                                <input type="checkbox" id="{$name}" name="{$name}" {if $value == 1}checked{/if} value="1"/>
+                                {$label}
+                            </label>
+                        </div>
+                    {/form_field}
+
+                    {form_field form=$form field="exclude_empty_folder"}
+                        <div class="{if $error}has-error{/if}">
+                            {form_error form=$form field="width"}
+                                <span class="error">{$message}</span>
+                            {/form_error}
+                            <label for="{$name}">
+                                <input type="checkbox" id="{$name}" name="{$name}" {if $value == 1}checked{/if} value="1"/>
+                                {$label}
+                            </label>
+                        </div>
+                    {/form_field}
+
+                    <div class="title title-without-tabs">
+                        <h2>{intl l="Configure sitemap images" d="sitemap.bo.default"}</h2>
+                    </div>
+
+                    <div class="alert alert-warning">{intl l="Set the same information as in your product image loop" d="sitemap.bo.default"}.</div>
 
                     {form_field form=$form field="timeout"}
                         <div class="form-group {if $error}has-error{/if}">

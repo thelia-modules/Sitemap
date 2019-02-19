@@ -62,6 +62,16 @@ class SitemapConfigForm extends BaseForm
                 'text',
                 ['label' => $this->translator->trans('Allow image zoom ([false] / true)', [], 'sitemap')]
             )
+            ->add(
+                'exclude_empty_category',
+                'text',
+                ['label' => $this->translator->trans('Do not include empty categories', [], 'sitemap')]
+            )
+            ->add(
+                'exclude_empty_folder',
+                'text',
+                ['label' => $this->translator->trans('Do not include empty folders', [], 'sitemap')]
+            )
         ;
     }
 }

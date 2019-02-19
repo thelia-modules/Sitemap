@@ -52,7 +52,9 @@ class SitemapConfigController extends BaseAdminController
                 'rotation' => Sitemap::getConfigValue('rotation'),
                 'resize_mode' => $resizeMode,
                 'background_color' => Sitemap::getConfigValue('background_color'),
-                'allow_zoom' => Sitemap::getConfigValue('allow_zoom')
+                'allow_zoom' => Sitemap::getConfigValue('allow_zoom'),
+                'exclude_empty_category' => Sitemap::getConfigValue('exclude_empty_category'),
+                'exclude_empty_folder' => Sitemap::getConfigValue('exclude_empty_folder')
             ]
         );
 
@@ -83,6 +85,9 @@ class SitemapConfigController extends BaseAdminController
             $form = $this->validateForm($baseForm);
             $data = $form->getData();
 
+            $excludeEmptyCategory = $data['exclude_empty_category'] == 1;
+            $excludeEmptyFolder = $data['exclude_empty_folder'] == 1;
+
             // Get resize mode
             switch ($data["resize_mode"]) {
                 case 'none':
@@ -108,6 +113,8 @@ class SitemapConfigController extends BaseAdminController
             Sitemap::setConfigValue('resize_mode', $resizeMode);
             Sitemap::setConfigValue('background_color', $data['background_color']);
             Sitemap::setConfigValue('allow_zoom', $data['allow_zoom']);
+            Sitemap::setConfigValue('exclude_empty_category', $excludeEmptyCategory);
+            Sitemap::setConfigValue('exclude_empty_folder', $excludeEmptyFolder);
 
         } catch (FormValidationException $ex) {
             // Invalid data entered
