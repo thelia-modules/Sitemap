@@ -4,7 +4,10 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
+use Sitemap\Sitemap;
 use Thelia\Model\Map\CategoryTableMap;
+use Thelia\Model\Map\ProductCategoryTableMap;
+use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
 use Thelia\Model\RewritingUrlQuery;
@@ -34,6 +37,10 @@ trait CategorySitemapTrait
 
         // Join with visible categories
         self::addJoinCategory($query, $locale);
+
+        if (Sitemap::getConfigValue('exclude_empty_category') == 1) {
+            self::addJoinCategoryCheckNotEmpty($query);
+        }
 
         // Get categories last update
         $query->withColumn(CategoryTableMap::UPDATED_AT, 'CATEGORY_UPDATE_AT');
@@ -78,5 +85,43 @@ trait CategorySitemapTrait
 
         // Get only visible categories
         $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+    }
+
+    /**
+     * Join categories and their URLs
+     *
+     * @param Criteria $query
+     */
+    protected function addJoinCategoryCheckNotEmpty(Criteria &$query)
+    {
+        $categoryChildJoin = new Join();
+        $categoryChildJoin->addExplicitCondition(
+            CategoryTableMap::TABLE_NAME,
+            'ID',
+            null,
+            CategoryTableMap::TABLE_NAME,
+            'PARENT',
+            'category_category_child'
+        );
+
+        $categoryChildJoin->setJoinType(Criteria::LEFT_JOIN);
+        $query->addJoinObject($categoryChildJoin, 'categoryCategoryChildJoin');
+
+
+        $productChildJoin = new Join();
+        $productChildJoin->addExplicitCondition(
+            CategoryTableMap::TABLE_NAME,
+            'ID',
+            null,
+            ProductCategoryTableMap::TABLE_NAME,
+            'CATEGORY_ID',
+            'category_product_child'
+        );
+
+        $productChildJoin->setJoinType(Criteria::LEFT_JOIN);
+        $query->addJoinObject($productChildJoin, 'categoryProductChildJoin');
+
+        $query->where('(category_category_child.id IS NOT NULL || category_product_child.product_id IS NOT NULL)');
+        $query->addGroupByColumn('ID');
     }
 }

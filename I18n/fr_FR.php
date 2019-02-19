@@ -2,6 +2,8 @@
 
 return array(
     'Allow image zoom ([false] / true)' => 'Autoriser le zoom des images ([false] / true)',
+    'Do not include empty categories' => 'Ne pas inclure les catégories vides',
+    'Do not include empty folders' => 'Ne pas inclure les dossiers vides',
     'Image background color' => 'Couleur de fond des images',
     'Image height' => 'Hauteur des images',
     'Image quality' => 'Qualité des images',
