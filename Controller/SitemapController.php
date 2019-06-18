@@ -23,6 +23,7 @@ class SitemapController extends BaseFrontController
     use ProductSitemapTrait;
     use FolderSitemapTrait;
     use ContentSitemapTrait;
+    use BrandSitemapTrait;
 
     use ProductImageTrait;
 
@@ -145,6 +146,7 @@ class SitemapController extends BaseFrontController
         $this->setSitemapProducts($sitemap, $locale);
         $this->setSitemapFolders($sitemap, $locale);
         $this->setSitemapContents($sitemap, $locale);
+        $this->setSitemapBrands($sitemap, $locale);
 
         // End sitemap
         $sitemap[] = "\t".'</urlset>';
