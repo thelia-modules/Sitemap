@@ -4,6 +4,7 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
+use Sitemap\Event\SitemapEvent;
 use Sitemap\Sitemap;
 use Thelia\Model\Map\ContentFolderTableMap;
 use Thelia\Model\Map\FolderTableMap;
@@ -50,13 +51,22 @@ trait FolderSitemapTrait
         // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
+            $sitemapEvent = new SitemapEvent(
+                $result,
+                URL::getInstance()->absoluteUrl($result->getUrl()),
+                date('c', strtotime($result->getVirtualColumn('FOLDER_UPDATE_AT')))
+            );
 
-            // Open new sitemap line & set folder URL & update date
-            $sitemap[] = '
-            <url>
-                <loc>'.URL::getInstance()->absoluteUrl($result->getUrl()).'</loc>
-                <lastmod>'.date('c', strtotime($result->getVirtualColumn('FOLDER_UPDATE_AT'))).'</lastmod>
-            </url>';
+            $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_EVENT, $sitemapEvent);
+
+            if (!$sitemapEvent->isHide()){
+                // Open new sitemap line & set brand URL & update date
+                $sitemap[] = '
+                <url>
+                    <loc>'.$sitemapEvent->getLoc().'</loc>
+                    <lastmod>'.$sitemapEvent->getLastmod().'</lastmod>
+                </url>';
+            }
         }
     }
 
