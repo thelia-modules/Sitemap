@@ -64,9 +64,11 @@ trait ProductImageTrait
     /**
      * Join products and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinProductI18n(Criteria &$query)
+    protected function addJoinProductI18n(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with Product to have only visible products
         $join = new Join();
@@ -83,7 +85,7 @@ trait ProductImageTrait
         $join->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($join, 'productJoin');
 
-        $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE.' = 1');
 
         // Join RewritingURL with ProductI18n to have product title for it's image
         $joinI18n = new Join();
@@ -124,6 +126,6 @@ trait ProductImageTrait
         $joinImage->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($joinImage, 'productImageJoin');
 
-        $query->addJoinCondition('productImageJoin', ProductImageTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('productImageJoin', ProductImageTableMap::VISIBLE.' = 1');
     }
 }

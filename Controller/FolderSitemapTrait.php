@@ -73,9 +73,11 @@ trait FolderSitemapTrait
     /**
      * Join folders and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinFolder(Criteria &$query)
+    protected function addJoinFolder(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with Folder to have only visible folders
         $join = new Join();
@@ -93,7 +95,7 @@ trait FolderSitemapTrait
         $query->addJoinObject($join, 'folderJoin');
 
         // Get only visible folders
-        $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('folderJoin', FolderTableMap::VISIBLE.' = 1');
     }
 
     protected function addJoinFolderCheckNotEmpty(Criteria &$query)

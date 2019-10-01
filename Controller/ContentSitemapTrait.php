@@ -67,9 +67,11 @@ trait ContentSitemapTrait
     /**
      * Join contents and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinContent(Criteria &$query)
+    protected function addJoinContent(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with Content to have only visible contents
         $join = new Join();
@@ -87,7 +89,7 @@ trait ContentSitemapTrait
         $query->addJoinObject($join, 'contentJoin');
 
         // Get only visible products
-        $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('contentJoin', ContentTableMap::VISIBLE.' = 1');
     }
 
 }

@@ -68,9 +68,11 @@ trait BrandSitemapTrait
     /**
      * Join brands and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinBrands(Criteria &$query)
+    protected function addJoinBrands(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with brand to have only visible brands
         $join = new Join();
@@ -88,7 +90,7 @@ trait BrandSitemapTrait
         $query->addJoinObject($join, 'brandJoin');
 
         // Get only visible products
-        $query->addJoinCondition('brandJoin', BrandTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('brandJoin', BrandTableMap::VISIBLE.' = 1');
     }
 
 }
