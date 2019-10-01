@@ -74,9 +74,11 @@ trait CategorySitemapTrait
     /**
      * Join categories and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinCategory(Criteria &$query)
+    protected function addJoinCategory(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with Category to have only visible categories
         $join = new Join();
@@ -94,7 +96,7 @@ trait CategorySitemapTrait
         $query->addJoinObject($join, 'categoryJoin');
 
         // Get only visible categories
-        $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('categoryJoin', CategoryTableMap::VISIBLE.' = 1');
     }
 
     /**

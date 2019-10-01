@@ -67,9 +67,11 @@ trait ProductSitemapTrait
     /**
      * Join products and their URLs
      *
-     * @param Criteria $query
+     * @param RewritingUrlQuery $query
+     *
+     * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function addJoinProduct(Criteria &$query)
+    protected function addJoinProduct(RewritingUrlQuery &$query)
     {
         // Join RewritingURL with Product to have only visible products
         $join = new Join();
@@ -87,6 +89,6 @@ trait ProductSitemapTrait
         $query->addJoinObject($join, 'productJoin');
 
         // Get only visible products
-        $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE, 1, Criteria::EQUAL, \PDO::PARAM_INT);
+        $query->addJoinCondition('productJoin', ProductTableMap::VISIBLE.' = 1');
     }
 }
