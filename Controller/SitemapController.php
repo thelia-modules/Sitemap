@@ -3,6 +3,8 @@
 namespace Sitemap\Controller;
 
 use Doctrine\Common\Cache\FilesystemCache;
+use Sitemap\Event\SitemapEndEvent;
+use Sitemap\Event\SitemapEvent;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -147,6 +149,13 @@ class SitemapController extends BaseFrontController
         $this->setSitemapFolders($sitemap, $locale);
         $this->setSitemapContents($sitemap, $locale);
         $this->setSitemapBrands($sitemap, $locale);
+
+        $event = new SitemapEndEvent();
+        $event->setSitemap($sitemap);
+
+        $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_END_EVENT, $event);
+
+        $sitemap = $event->getSitemap();
 
         // End sitemap
         $sitemap[] = "\t".'</urlset>';
