@@ -1,21 +1,15 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: nicolasbarbey
- * Date: 01/08/2019
- * Time: 10:29
- */
 
 namespace Sitemap\Event;
 
-
-use RewriteUrl\RewriteUrl;
 use Thelia\Core\Event\ActionEvent;
 use Thelia\Model\RewritingUrl;
 
 class SitemapEvent extends ActionEvent
 {
     const SITEMAP_EVENT = 'sitemap_event';
+
+    const SITEMAP_END_EVENT = 'sitemap_end_event';
 
     /** @var RewritingUrl */
     protected $rewritingUrl;
@@ -38,7 +32,6 @@ class SitemapEvent extends ActionEvent
         $this->lastmod = $lastmod;
 
         $this->hide = $hide;
-
     }
 
     /**
