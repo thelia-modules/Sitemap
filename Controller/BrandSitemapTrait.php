@@ -5,6 +5,7 @@ namespace Sitemap\Controller;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Sitemap\Event\SitemapEvent;
+use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
 use Thelia\Model\Map\BrandTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
@@ -56,10 +57,20 @@ trait BrandSitemapTrait
 
             if (!$sitemapEvent->isHide()){
                 // Open new sitemap line & set brand URL & update date
+
+                $sitemapPriority = SitemapPriorityQuery::create()
+                    ->filterBySource($result->getView())
+                    ->filterBySourceId($result->getViewId())
+                    ->findOne();
+
+                $sitemapPriorityValue = ($sitemapPriority === null) ? Sitemap::getConfigValue('default_priority_brand_value', SiteMap::DEFAULT_PRIORITY_BRAND_VALUE) : $sitemapPriority->getValue();
+
                 $sitemap[] = '
                 <url>
                     <loc>'.$sitemapEvent->getLoc().'</loc>
                     <lastmod>'.$sitemapEvent->getLastmod().'</lastmod>
+                    <priority>'.$sitemapPriorityValue.'</priority>
+                    <changefreq>'.Sitemap::getConfigValue('default_update_frequency', SiteMap::DEFAULT_FREQUENCY_UPDATE).'</changefreq>
                 </url>';
             }
         }

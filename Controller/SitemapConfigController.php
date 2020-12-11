@@ -54,7 +54,13 @@ class SitemapConfigController extends BaseAdminController
                 'background_color' => Sitemap::getConfigValue('background_color'),
                 'allow_zoom' => Sitemap::getConfigValue('allow_zoom'),
                 'exclude_empty_category' => Sitemap::getConfigValue('exclude_empty_category'),
-                'exclude_empty_folder' => Sitemap::getConfigValue('exclude_empty_folder')
+                'exclude_empty_folder' => Sitemap::getConfigValue('exclude_empty_folder'),
+                'default_priority_homepage_value' => Sitemap::getConfigValue('default_priority_homepage_value'),
+                'default_priority_brand_value' => Sitemap::getConfigValue('default_priority_brand_value'),
+                'default_priority_category_value' => Sitemap::getConfigValue('default_priority_category_value'),
+                'default_priority_product_value' => Sitemap::getConfigValue('default_priority_product_value'),
+                'default_priority_folder_value' => Sitemap::getConfigValue('default_priority_folder_value'),
+                'default_update_frequency' => Sitemap::getConfigValue('default_update_frequency')
             ]
         );
 
@@ -115,6 +121,12 @@ class SitemapConfigController extends BaseAdminController
             Sitemap::setConfigValue('allow_zoom', $data['allow_zoom']);
             Sitemap::setConfigValue('exclude_empty_category', $excludeEmptyCategory);
             Sitemap::setConfigValue('exclude_empty_folder', $excludeEmptyFolder);
+            Sitemap::setConfigValue('default_priority_homepage_value', $data['default_priority_homepage_value']);
+            Sitemap::setConfigValue('default_priority_brand_value', $data['default_priority_brand_value']);
+            Sitemap::setConfigValue('default_priority_category_value', $data['default_priority_category_value']);
+            Sitemap::setConfigValue('default_priority_product_value', $data['default_priority_product_value']);
+            Sitemap::setConfigValue('default_priority_folder_value', $data['default_priority_folder_value']);
+            Sitemap::setConfigValue('default_update_frequency', $data['default_update_frequency']);
 
         } catch (FormValidationException $ex) {
             // Invalid data entered
