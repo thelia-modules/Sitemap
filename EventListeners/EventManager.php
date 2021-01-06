@@ -136,7 +136,7 @@ class EventManager implements EventSubscriberInterface
         $sitemapPriority = SitemapPriorityQuery::create()
             ->filterBySource($source)
             ->filterBySourceId($sourceId)
-            ->findOne();
+            ->findOneOrCreate();
 
         $sitemapValue = $event->sitemapPriority;
 
