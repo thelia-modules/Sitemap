@@ -38,7 +38,6 @@ class Sitemap extends BaseModule
 
     public function postActivation(ConnectionInterface $con = null)
     {
-        // Créer la base de données si elle n'existe pas
         try {
             SitemapPriorityQuery::create()->findOne();
         } catch (\Exception $ex) {
