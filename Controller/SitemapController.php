@@ -5,6 +5,7 @@ namespace Sitemap\Controller;
 use Doctrine\Common\Cache\FilesystemCache;
 use Sitemap\Event\SitemapEndEvent;
 use Sitemap\Event\SitemapEvent;
+use Sitemap\Sitemap;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -140,6 +141,8 @@ class SitemapController extends BaseFrontController
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
             <url>
                 <loc>'.URL::getInstance()->getIndexPage().'</loc>
+                <priority>'.Sitemap::getConfigValue('default_priority_homepage_value', SiteMap::DEFAULT_PRIORITY_HOME_VALUE).'</priority>
+                <changefreq>'.Sitemap::getConfigValue('default_update_frequency', SiteMap::DEFAULT_FREQUENCY_UPDATE).'</changefreq>
             </url>'
         ];
 

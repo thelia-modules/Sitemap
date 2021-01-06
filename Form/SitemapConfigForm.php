@@ -72,6 +72,36 @@ class SitemapConfigForm extends BaseForm
                 'text',
                 ['label' => $this->translator->trans('Do not include empty folders', [], 'sitemap')]
             )
+            ->add(
+                'default_priority_homepage_value',
+                'text',
+                ['label' => $this->translator->trans('Default home page priority', [], 'sitemap')]
+            )
+            ->add(
+                'default_priority_brand_value',
+                'text',
+                ['label' => $this->translator->trans('Default brand page priority', [], 'sitemap')]
+            )
+            ->add(
+                'default_priority_category_value',
+                'text',
+                ['label' => $this->translator->trans('Default category page priority', [], 'sitemap')]
+            )
+            ->add(
+                'default_priority_product_value',
+                'text',
+                ['label' => $this->translator->trans('Default product page priority', [], 'sitemap')]
+            )
+            ->add(
+                'default_priority_folder_value',
+                'text',
+                ['label' => $this->translator->trans('Default folder page priority', [], 'sitemap')]
+            )
+            ->add(
+                'default_update_frequency',
+                'text',
+                ['label' => $this->translator->trans('Default page update frequency (always / hourly / daily / weekly / monthly / yearly / never)', [], 'sitemap')]
+            )
         ;
     }
 }

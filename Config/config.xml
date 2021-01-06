@@ -4,9 +4,31 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
+    <services>
+        <service id="sitemap.listener" class="Sitemap\EventListeners\EventManager" scope="request">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="request"/>
+        </service>
+    </services>
+
     <hooks>
         <hook id="sitemap.hook" class="Sitemap\Hook\SitemapHook" scope="request">
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfig" />
+        </hook>
+        <hook id="sitemap.product_edit.hook" class="Sitemap\Hook\SitemapHook" scope="request">
+            <tag name="hook.event_listener" event="product.modification.form-right.bottom" type="back" method="onProductEditRightColumnBottom" />
+        </hook>
+        <hook id="sitemap.category_edit.hook" class="Sitemap\Hook\SitemapHook" scope="request">
+            <tag name="hook.event_listener" event="category.modification.form-right.bottom" type="back" method="onCategoryEditRightColumnBottom" />
+        </hook>
+        <hook id="sitemap.content_edit.hook" class="Sitemap\Hook\SitemapHook" scope="request">
+            <tag name="hook.event_listener" event="content.modification.form-right.bottom" type="back" method="onContentEditRightColumnBottom" />
+        </hook>
+        <hook id="sitemap.folder_edit.hook" class="Sitemap\Hook\SitemapHook" scope="request">
+            <tag name="hook.event_listener" event="folder.modification.form-right.bottom" type="back" method="onFolderEditRightColumnBottom" />
+        </hook>
+        <hook id="sitemap.brand_edit.hook" class="Sitemap\Hook\SitemapHook" scope="request">
+            <tag name="hook.event_listener" event="brand.modification.form-right.bottom" type="back" method="onBrandEditRightColumnBottom" />
         </hook>
     </hooks>
 
