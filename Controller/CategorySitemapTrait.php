@@ -7,6 +7,8 @@ use Propel\Runtime\ActiveQuery\Join;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Model\Map\CategoryTableMap;
 use Thelia\Model\Map\ProductCategoryTableMap;
 use Thelia\Model\Map\ProductTableMap;
@@ -29,7 +31,7 @@ trait CategorySitemapTrait
      * @param $locale
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function setSitemapCategories(&$sitemap, $locale)
+    protected function setSitemapCategories(&$sitemap, $locale, EventDispatcherInterface $eventDispatcher)
     {
         // Prepare query - get categories URL
         $query = RewritingUrlQuery::create()
@@ -59,7 +61,7 @@ trait CategorySitemapTrait
                 date('c', strtotime($result->getVirtualColumn('CATEGORY_UPDATE_AT')))
             );
 
-            $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_EVENT, $sitemapEvent);
+            $eventDispatcher->dispatch($sitemapEvent, SitemapEvent::SITEMAP_EVENT);
 
             if (!$sitemapEvent->isHide()) {
                 // Open new sitemap line & set category URL & update date

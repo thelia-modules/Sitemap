@@ -2,6 +2,8 @@
 
 namespace Sitemap\Form;
 
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Form\BaseForm;
 
 /**
@@ -11,7 +13,7 @@ use Thelia\Form\BaseForm;
  */
 class SitemapConfigForm extends BaseForm
 {
-    public function getName()
+    public static function getName()
     {
         return 'sitemap_config_form';
     }
@@ -24,82 +26,82 @@ class SitemapConfigForm extends BaseForm
         $this->formBuilder
             ->add(
                 'timeout',
-                'number',
+                NumberType::class,
                 ['label' => $this->translator->trans('Script timeout (in seconds) for images generation (default: 30)', [], 'sitemap')]
             )
             ->add(
                 'width',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image width', [], 'sitemap')]
             )
             ->add(
                 'height',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image height', [], 'sitemap')]
             )
             ->add(
                 'quality',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image quality', [], 'sitemap')]
             )
             ->add(
                 'rotation',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image rotation', [], 'sitemap')]
             )
             ->add(
                 'resize_mode',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image resize mode ([borders] / crop / none)', [], 'sitemap')]
             )
             ->add(
                 'background_color',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Image background color', [], 'sitemap')]
             )
             ->add(
                 'allow_zoom',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Allow image zoom ([false] / true)', [], 'sitemap')]
             )
             ->add(
                 'exclude_empty_category',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Do not include empty categories', [], 'sitemap')]
             )
             ->add(
                 'exclude_empty_folder',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Do not include empty folders', [], 'sitemap')]
             )
             ->add(
                 'default_priority_homepage_value',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default home page priority', [], 'sitemap')]
             )
             ->add(
                 'default_priority_brand_value',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default brand page priority', [], 'sitemap')]
             )
             ->add(
                 'default_priority_category_value',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default category page priority', [], 'sitemap')]
             )
             ->add(
                 'default_priority_product_value',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default product page priority', [], 'sitemap')]
             )
             ->add(
                 'default_priority_folder_value',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default folder page priority', [], 'sitemap')]
             )
             ->add(
                 'default_update_frequency',
-                'text',
+                TextType::class,
                 ['label' => $this->translator->trans('Default page update frequency (always / hourly / daily / weekly / monthly / yearly / never)', [], 'sitemap')]
             )
         ;

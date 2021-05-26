@@ -15,6 +15,7 @@ namespace Sitemap;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Sitemap\Model\SitemapPriority;
 use Sitemap\Model\SitemapPriorityQuery;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
@@ -36,7 +37,7 @@ class Sitemap extends BaseModule
 
     const DEFAULT_FREQUENCY_UPDATE = 'weekly';
 
-    public function postActivation(ConnectionInterface $con = null)
+    public function postActivation(ConnectionInterface $con = null): void
     {
         try {
             SitemapPriorityQuery::create()->findOne();
@@ -47,7 +48,7 @@ class Sitemap extends BaseModule
     }
 
 
-    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null): void
     {
         $finder = (new Finder)
             ->files()
@@ -68,5 +69,13 @@ class Sitemap extends BaseModule
                 );
             }
         }
+    }
+
+    public static function configureServices(ServicesConfigurator $servicesConfigurator): void
+    {
+        $servicesConfigurator->load(self::getModuleCode().'\\', __DIR__)
+            ->exclude([THELIA_MODULE_DIR . ucfirst(self::getModuleCode()). "/I18n/*"])
+            ->autowire(true)
+            ->autoconfigure(true);
     }
 }

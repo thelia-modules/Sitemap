@@ -7,6 +7,8 @@ use Propel\Runtime\ActiveQuery\Join;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Model\Map\ContentTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
 use Thelia\Model\RewritingUrl;
@@ -27,7 +29,7 @@ trait ContentSitemapTrait
      * @param $locale
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function setSitemapContents(&$sitemap, $locale)
+    protected function setSitemapContents(&$sitemap, $locale, EventDispatcherInterface $eventDispatcher)
     {
         // Prepare query - get contents URL
         $query = RewritingUrlQuery::create()
@@ -53,7 +55,7 @@ trait ContentSitemapTrait
                 date('c', strtotime($result->getVirtualColumn('CONTENT_UPDATE_AT')))
             );
 
-            $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_EVENT, $sitemapEvent);
+            $eventDispatcher->dispatch($sitemapEvent, SitemapEvent::SITEMAP_EVENT);
 
             if (!$sitemapEvent->isHide()){
                 // Open new sitemap line & set brand URL & update date

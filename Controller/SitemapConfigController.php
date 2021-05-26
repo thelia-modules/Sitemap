@@ -2,19 +2,28 @@
 
 namespace Sitemap\Controller;
 
+use Sitemap\Form\SitemapConfigForm;
 use Sitemap\Sitemap;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class SitemapConfigController
+ * @Route("/admin/module/Sitemap", name="sitemap")
  * @package Sitemap\Controller
  * @author Etienne Perriere <eperriere@openstudio.fr>
  */
 class SitemapConfigController extends BaseAdminController
 {
+    /**
+     *
+     * @Route("", name="_configure", methods="GET")
+     */
     public function defaultAction()
     {
         if (null !== $response = $this->checkAuth([AdminResources::MODULE], ["sitemap"], AccessManager::VIEW)) {
@@ -42,8 +51,8 @@ class SitemapConfigController extends BaseAdminController
 
         // Build form
         $form = $this->createForm(
-            "sitemap_config_form",
-            'form',
+            SitemapConfigForm::getName(),
+            FormType::class,
             [
                 'timeout' => Sitemap::getConfigValue('timeout'),
                 'width' => Sitemap::getConfigValue('width'),
@@ -72,15 +81,16 @@ class SitemapConfigController extends BaseAdminController
     /**
      * Save data
      *
+     * @Route("", name="_configue_save", methods="POST")
      * @return mixed|\Thelia\Core\HttpFoundation\Response
      */
-    public function saveAction()
+    public function saveAction(ParserContext $parserContext)
     {
         if (null !== $response = $this->checkAuth([AdminResources::MODULE], ["sitemap"], AccessManager::UPDATE)) {
             return $response;
         }
 
-        $baseForm = $this->createForm("sitemap_config_form");
+        $baseForm = $this->createForm(SitemapConfigForm::getName());
 
         $errorMessage = null;
 
@@ -141,12 +151,12 @@ class SitemapConfigController extends BaseAdminController
             $baseForm->setErrorMessage($errorMessage);
 
             // Send the form and the error to the parser
-            $this->getParserContext()
+            $parserContext
                 ->addForm($baseForm)
                 ->setGeneralError($errorMessage)
             ;
         } else {
-            $this->getParserContext()
+            $parserContext
                 ->set("success", true)
             ;
         }

@@ -5,6 +5,8 @@ namespace Sitemap\Controller;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
 use Sitemap\Sitemap;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Model\Map\ProductI18nTableMap;
 use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\Map\ProductTableMap;
@@ -19,7 +21,7 @@ use Thelia\Model\RewritingUrlQuery;
  */
 trait ProductImageTrait
 {
-    protected function setSitemapProductImages(&$sitemap, $locale)
+    protected function setSitemapProductImages(&$sitemap, $locale, EventDispatcherInterface $eventDispatcher)
     {
         // Change timeout for this script
         ini_set('max_execution_time', Sitemap::getConfigValue('timeout', 30));
@@ -57,7 +59,7 @@ trait ProductImageTrait
         foreach ($results as $result) {
 
             // Generate image data
-            $this->generateSitemapImage('product', $result, $configValues, $sitemap);
+            $this->generateSitemapImage('product', $result, $configValues, $sitemap,$eventDispatcher);
         }
     }
 

@@ -6,14 +6,19 @@ use Doctrine\Common\Cache\FilesystemCache;
 use Sitemap\Event\SitemapEndEvent;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Sitemap;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
+use Thelia\Core\HttpFoundation\Session\Session;
 use Thelia\Model\ConfigQuery;
 use Thelia\Model\LangQuery;
 use Thelia\Model\RewritingUrl;
 use Thelia\Tools\URL;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class SitemapController
@@ -46,18 +51,20 @@ class SitemapController extends BaseFrontController
 
     /**
      * Generate sitemap
+     * @Route("/sitemap", name="sitemap_generate")
      */
-    public function generateAction()
+    public function generateAction(EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
-        return $this->generateSitemap(self::SITEMAP_CACHE_KEY, self::SITEMAP_CACHE_DIR);
+        return $this->generateSitemap(self::SITEMAP_CACHE_KEY, self::SITEMAP_CACHE_DIR, $eventDispatcher, $session, $requestStack);
     }
 
     /**
      * Generate sitemap image
+     * @Route("/sitemap-image", name="sitemap_generate_image")
      */
-    public function generateImageAction()
+    public function generateImageAction(EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
-        return $this->generateSitemap(self::SITEMAP_IMAGE_CACHE_KEY, self::SITEMAP_IMAGE_CACHE_DIR);
+        return $this->generateSitemap(self::SITEMAP_IMAGE_CACHE_KEY, self::SITEMAP_IMAGE_CACHE_DIR, $eventDispatcher, $session, $requestStack);
     }
 
     /**
@@ -67,10 +74,10 @@ class SitemapController extends BaseFrontController
      * @param $cacheDirName
      * @return Response
      */
-    public function generateSitemap($cacheKey, $cacheDirName)
+    public function generateSitemap($cacheKey, $cacheDirName, EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
         // Get and check locale
-        $locale = $this->getSession()->getLang()->getLocale();
+        $locale = $session->getLang()->getLocale();
 
         if ("" !== $locale) {
             if (! $this->checkLang($locale)){
@@ -86,7 +93,7 @@ class SitemapController extends BaseFrontController
         $cacheDriver = new FilesystemCache($cacheDir);
 
         // Check if sitemap has to be deleted
-        if (!($this->checkAdmin() && "" !== $this->getRequest()->query->get("flush", ""))){
+        if (!($this->checkAdmin() && "" !== $requestStack->getCurrentRequest()->query->get("flush", ""))){
             // Get cached sitemap
             $sitemapContent = $cacheDriver->fetch($cacheKey);
         } else {
@@ -100,13 +107,13 @@ class SitemapController extends BaseFrontController
             switch ($cacheDirName) {
                 // Image
                 case self::SITEMAP_IMAGE_CACHE_DIR:
-                    $sitemap = $this->hydrateSitemapImage($locale);
+                    $sitemap = $this->hydrateSitemapImage($locale, $eventDispatcher);
                     break;
 
                 // Standard
                 case self::SITEMAP_CACHE_DIR:
                 default:
-                    $sitemap = $this->hydrateSitemap($locale);
+                    $sitemap = $this->hydrateSitemap($locale, $eventDispatcher);
                     break;
             }
 
@@ -132,7 +139,7 @@ class SitemapController extends BaseFrontController
      * @param $locale
      * @return array
      */
-    protected function hydrateSitemap($locale)
+    protected function hydrateSitemap($locale, EventDispatcherInterface $eventDispatcher)
     {
         // Begin sitemap
         $sitemap = ['<?xml version="1.0" encoding="UTF-8"?>
@@ -147,16 +154,16 @@ class SitemapController extends BaseFrontController
         ];
 
         // Hydrate sitemap
-        $this->setSitemapCategories($sitemap, $locale);
-        $this->setSitemapProducts($sitemap, $locale);
-        $this->setSitemapFolders($sitemap, $locale);
-        $this->setSitemapContents($sitemap, $locale);
-        $this->setSitemapBrands($sitemap, $locale);
+        $this->setSitemapCategories($sitemap, $locale, $eventDispatcher);
+        $this->setSitemapProducts($sitemap, $locale, $eventDispatcher);
+        $this->setSitemapFolders($sitemap, $locale, $eventDispatcher);
+        $this->setSitemapContents($sitemap, $locale, $eventDispatcher);
+        $this->setSitemapBrands($sitemap, $locale, $eventDispatcher);
 
         $event = new SitemapEndEvent();
         $event->setSitemap($sitemap);
 
-        $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_END_EVENT, $event);
+        $eventDispatcher->dispatch($event,SitemapEvent::SITEMAP_END_EVENT);
 
         $sitemap = $event->getSitemap();
 
@@ -172,7 +179,7 @@ class SitemapController extends BaseFrontController
      * @param $locale
      * @return array
      */
-    protected function hydrateSitemapImage($locale)
+    protected function hydrateSitemapImage($locale, EventDispatcherInterface $eventDispatcher)
     {
         // Begin sitemap image
         $sitemap = ['<?xml version="1.0" encoding="UTF-8"?>
@@ -185,7 +192,7 @@ class SitemapController extends BaseFrontController
         ];
 
         // Hydrate sitemap image
-        $this->setSitemapProductImages($sitemap, $locale);
+        $this->setSitemapProductImages($sitemap, $locale, $eventDispatcher);
 
         // End sitemap image
         $sitemap[] = "\t".'</urlset>';
@@ -201,7 +208,7 @@ class SitemapController extends BaseFrontController
      * @param $configValues
      * @param $sitemap
      */
-    protected function generateSitemapImage($type, $result, $configValues, &$sitemap)
+    protected function generateSitemapImage($type, $result, $configValues, &$sitemap, EventDispatcherInterface $eventDispatcher)
     {
         $event = new ImageEvent();
 
@@ -227,7 +234,7 @@ class SitemapController extends BaseFrontController
 
         try {
             // Dispatch image processing event
-            $this->dispatch(TheliaEvents::IMAGE_PROCESS, $event);
+            $eventDispatcher->dispatch($event, TheliaEvents::IMAGE_PROCESS);
 
             // New sitemap image entry
             $sitemap[] = '

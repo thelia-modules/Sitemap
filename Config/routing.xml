@@ -4,20 +4,4 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <route id="sitemap.process" path="/sitemap">
-        <default key="_controller">Sitemap\Controller\SitemapController::generateAction</default>
-    </route>
-
-    <route id="sitemap.image.process" path="/sitemap-image">
-        <default key="_controller">Sitemap\Controller\SitemapController::generateImageAction</default>
-    </route>
-
-    <route id="sitemap.configuration.default" path="/admin/module/Sitemap" methods="get">
-        <default key="_controller">Sitemap:SitemapConfig:default</default>
-    </route>
-
-    <route id="sitemap.configuration.save" path="/admin/module/Sitemap" methods="post">
-        <default key="_controller">Sitemap:SitemapConfig:save</default>
-    </route>
-
 </routes>

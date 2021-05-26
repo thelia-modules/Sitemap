@@ -4,13 +4,6 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
 
-    <services>
-        <service id="sitemap.listener" class="Sitemap\EventListeners\EventManager" scope="request">
-            <tag name="kernel.event_subscriber"/>
-            <argument type="service" id="request"/>
-        </service>
-    </services>
-
     <hooks>
         <hook id="sitemap.hook" class="Sitemap\Hook\SitemapHook" scope="request">
             <tag name="hook.event_listener" event="module.configuration" type="back" method="onModuleConfig" />

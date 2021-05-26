@@ -7,6 +7,8 @@ use Propel\Runtime\ActiveQuery\Join;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Model\Map\ContentFolderTableMap;
 use Thelia\Model\Map\FolderTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
@@ -28,7 +30,7 @@ trait FolderSitemapTrait
      * @param $locale
      * @throws \Propel\Runtime\Exception\PropelException
      */
-    protected function setSitemapFolders(&$sitemap, $locale)
+    protected function setSitemapFolders(&$sitemap, $locale, EventDispatcherInterface $eventDispatcher)
     {
         // Prepare query - get folders URL
         $query = RewritingUrlQuery::create()
@@ -58,7 +60,7 @@ trait FolderSitemapTrait
                 date('c', strtotime($result->getVirtualColumn('FOLDER_UPDATE_AT')))
             );
 
-            $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_EVENT, $sitemapEvent);
+            $eventDispatcher->dispatch($sitemapEvent, SitemapEvent::SITEMAP_EVENT);
 
             if (!$sitemapEvent->isHide()){
                 // Open new sitemap line & set brand URL & update date
