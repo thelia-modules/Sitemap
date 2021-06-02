@@ -19,6 +19,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Sitemap\Model\Map\SitemapPriorityTableMap;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Thelia\Core\Event\ActionEvent;
 use Thelia\Core\Event\Brand\BrandDeleteEvent;
 use Thelia\Core\Event\Brand\BrandEvent;
@@ -108,7 +109,7 @@ class EventManager implements EventSubscriberInterface
     {
         $event->getForm()->getFormBuilder()->add(
             'sitemapPriority',
-            'text',
+            TextType::class,
             [
                 'required' => false,
                 'label' => Translator::getInstance()->trans(
