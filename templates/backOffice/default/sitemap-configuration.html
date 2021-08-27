@@ -22,7 +22,7 @@
     <div class="general-block-decorator">
         <div class="row">
             <div class="col-md-12">
-                {if $success}
+                {if $success|default:null}
                 <div class="alert alert-success">
                     {intl l="Configuration correctly saved" d="sitemap.bo.default"}
                 </div>
@@ -41,7 +41,7 @@
                     {form_field form=$form field="exclude_empty_category"}
                         <div class="{if $error}has-error{/if}">
                             {form_error form=$form field="width"}
-                                <span class="error">{$message}</span>
+                                <span class="error">{$message|default:null}</span>
                             {/form_error}
                             <label for="{$name}">
                                 <input type="checkbox" id="{$name}" name="{$name}" {if $value == 1}checked{/if} value="1"/>
@@ -53,7 +53,7 @@
                     {form_field form=$form field="exclude_empty_folder"}
                         <div class="{if $error}has-error{/if}">
                             {form_error form=$form field="width"}
-                                <span class="error">{$message}</span>
+                                <span class="error">{$message|default:null}</span>
                             {/form_error}
                             <label for="{$name}">
                                 <input type="checkbox" id="{$name}" name="{$name}" {if $value == 1}checked{/if} value="1"/>
@@ -75,7 +75,7 @@
 
                                 {form_error form=$form field="timeout"}
                                     <br />
-                                    <span class="error">{$message}</span>
+                                    <span class="error">{$message|default:null}</span>
                                 {/form_error}
                             </label>
 
@@ -92,7 +92,7 @@
 
                             {form_error form=$form field="width"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -107,7 +107,7 @@
 
                             {form_error form=$form field="height"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -122,7 +122,7 @@
 
                             {form_error form=$form field="quality"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -137,7 +137,7 @@
 
                             {form_error form=$form field="rotation"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -152,7 +152,7 @@
 
                             {form_error form=$form field="resize_mode"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -167,7 +167,7 @@
 
                             {form_error form=$form field="background_color"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -182,7 +182,7 @@
 
                             {form_error form=$form field="allow_zoom"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -197,7 +197,7 @@
 
                             {form_error form=$form field="default_priority_homepage_value"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -212,7 +212,7 @@
 
                             {form_error form=$form field="default_priority_brand_value"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -227,7 +227,7 @@
 
                             {form_error form=$form field="default_priority_category_value"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -242,7 +242,7 @@
 
                             {form_error form=$form field="default_priority_product_value"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -257,7 +257,7 @@
 
                             {form_error form=$form field="default_priority_folder_value"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
@@ -272,7 +272,7 @@
 
                             {form_error form=$form field="default_update_frequency"}
                             <br />
-                            <span class="error">{$message}</span>
+                            <span class="error">{$message|default:null}</span>
                             {/form_error}
                         </label>
 
