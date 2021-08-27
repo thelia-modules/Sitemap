@@ -19,6 +19,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurat
 use Symfony\Component\Finder\Finder;
 use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
 class Sitemap extends BaseModule
 {
@@ -39,11 +40,10 @@ class Sitemap extends BaseModule
 
     public function postActivation(ConnectionInterface $con = null): void
     {
-        try {
-            SitemapPriorityQuery::create()->findOne();
-        } catch (\Exception $ex) {
+        if (!self::getConfigValue('is_initialized',null)){
             $database = new Database($con->getWrappedConnection());
             $database->insertSql(null, array(__DIR__ . '/Config/thelia.sql'));
+            self::setConfigValue('is_initialized', 1);
         }
     }
 
