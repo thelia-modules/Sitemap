@@ -4,6 +4,7 @@ namespace Sitemap\Controller;
 
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\Join;
+use Propel\Runtime\Propel;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
@@ -44,33 +45,43 @@ trait ProductSitemapTrait
         // Execute query
         $results = $query->find();
 
+        $defaultPriority = Sitemap::getConfigValue('default_priority_product_value', SiteMap::DEFAULT_PRIORITY_PRODUCT_VALUE);
+        $defaultUpdateFrequency = Sitemap::getConfigValue('default_update_frequency', SiteMap::DEFAULT_FREQUENCY_UPDATE);
+        $con = Propel::getConnection();
+
         // For each result, hydrate XML file
         /** @var RewritingUrl $result */
         foreach ($results as $result) {
+
             $sitemapEvent = new SitemapEvent(
                 $result,
                 URL::getInstance()->absoluteUrl($result->getUrl()),
                 date('c', strtotime($result->getVirtualColumn('PRODUCT_UPDATE_AT')))
             );
-
             $this->getDispatcher()->dispatch(SitemapEvent::SITEMAP_EVENT, $sitemapEvent);
 
             if (!$sitemapEvent->isHide()){
                 // Open new sitemap line & set brand URL & update date
+                $sql = 'SELECT value from sitemap_priority where source=:p0 and source_id=:p1';
+                $stmt = $con->prepare($sql);
+                $stmt->bindValue(':p0', $result->getView(), \PDO::PARAM_STR);
+                $stmt->bindValue(':p1', (int)$result->getViewId(), \PDO::PARAM_INT);
+                $stmt->execute();
+                $sitemapPriorityValue = null;
+                $sitemapPriorityValue = $stmt->fetch(\PDO::FETCH_NUM);
 
-                $sitemapPriority = SitemapPriorityQuery::create()
-                    ->filterBySource($result->getView())
-                    ->filterBySourceId($result->getViewId())
-                    ->findOne();
-
-                $sitemapPriorityValue = ($sitemapPriority === null) ? Sitemap::getConfigValue('default_priority_product_value', SiteMap::DEFAULT_PRIORITY_PRODUCT_VALUE) : $sitemapPriority->getValue();
-
+                if($sitemapPriorityValue){
+                    $sitemapPriorityValue = $sitemapPriorityValue[0];
+                }
+                if (!$sitemapPriorityValue){
+                    $sitemapPriorityValue = $defaultPriority;
+                }
                 $sitemap[] = '
                 <url>
                     <loc>'.$sitemapEvent->getLoc().'</loc>
                     <lastmod>'.$sitemapEvent->getLastmod().'</lastmod>
                     <priority>'.$sitemapPriorityValue.'</priority>
-                    <changefreq>'.Sitemap::getConfigValue('default_update_frequency', SiteMap::DEFAULT_FREQUENCY_UPDATE).'</changefreq>
+                    <changefreq>'.$defaultUpdateFrequency.'</changefreq>
                 </url>';
             }
         }
