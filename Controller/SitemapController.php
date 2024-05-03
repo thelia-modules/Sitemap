@@ -2,13 +2,14 @@
 
 namespace Sitemap\Controller;
 
-use Doctrine\Common\Cache\FilesystemCache;
+use Psr\Cache\InvalidArgumentException;
 use Sitemap\Event\SitemapEndEvent;
 use Sitemap\Event\SitemapEvent;
 use Sitemap\Sitemap;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Cache\ItemInterface;
 use Thelia\Controller\Front\BaseFrontController;
 use Thelia\Core\Event\Image\ImageEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -73,6 +74,7 @@ class SitemapController extends BaseFrontController
      * @param $cacheKey
      * @param $cacheDirName
      * @return Response
+     * @throws InvalidArgumentException
      */
     public function generateSitemap($cacheKey, $cacheDirName, EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
@@ -87,40 +89,23 @@ class SitemapController extends BaseFrontController
 
         // Get sitemap cache information
         $sitemapContent = false;
-        $cacheDir = $this->getCacheDir($cacheDirName);
         $cacheKey .= $locale;
-        $cacheExpire = intval(ConfigQuery::read("sitemap_ttl", '7200')) ?: 7200;
-        $cacheDriver = new FilesystemCache($cacheDir);
-
+        $cacheExpire = (int) ConfigQuery::read("sitemap_ttl", '7200') ?: 7200;
+        $cacheDriver = new FilesystemAdapter();
         // Check if sitemap has to be deleted
         if (!($this->checkAdmin() && "" !== $requestStack->getCurrentRequest()->query->get("flush", ""))){
             // Get cached sitemap
-            $sitemapContent = $cacheDriver->fetch($cacheKey);
+            $sitemapContent = $cacheDriver->get($cacheKey, function(ItemInterface $item) use ($cacheExpire, $cacheDirName, $locale, $eventDispatcher) {
+                $item->expiresAfter($cacheExpire);
+                $sitemap = match ($cacheDirName) {
+                    self::SITEMAP_IMAGE_CACHE_DIR => $this->hydrateSitemapImage($locale, $eventDispatcher),
+                    default => $this->hydrateSitemap($locale, $eventDispatcher),
+                };
+
+                return implode("\n", $sitemap);
+            });
         } else {
             $cacheDriver->delete($cacheKey);
-        }
-
-        // If not in cache, generate and cache it
-        if (false === $sitemapContent){
-
-            // Check if we generate the standard sitemap or the sitemap image
-            switch ($cacheDirName) {
-                // Image
-                case self::SITEMAP_IMAGE_CACHE_DIR:
-                    $sitemap = $this->hydrateSitemapImage($locale, $eventDispatcher);
-                    break;
-
-                // Standard
-                case self::SITEMAP_CACHE_DIR:
-                default:
-                    $sitemap = $this->hydrateSitemap($locale, $eventDispatcher);
-                    break;
-            }
-
-            $sitemapContent = implode("\n", $sitemap);
-
-            // Save cache
-            $cacheDriver->save($cacheKey, $sitemapContent, $cacheExpire);
         }
 
         // Render
