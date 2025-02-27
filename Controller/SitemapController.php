@@ -48,8 +48,6 @@ class SitemapController extends BaseFrontController
     /** Key prefix for sitemap image cache */
     const SITEMAP_IMAGE_CACHE_KEY = "sitemap-image";
 
-    protected $useFallbackTemplate = true;
-
     /**
      * Generate sitemap
      * @Route("/sitemap", name="sitemap_generate")
