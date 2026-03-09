@@ -8,6 +8,7 @@ use Sitemap\Sitemap;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Model\Map\ProductI18nTableMap;
+use Thelia\Model\Map\ProductImageI18nTableMap;
 use Thelia\Model\Map\ProductImageTableMap;
 use Thelia\Model\Map\ProductTableMap;
 use Thelia\Model\Map\RewritingUrlTableMap;
@@ -39,7 +40,7 @@ trait ProductImageTrait
         $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
         $query->addDescendingOrderByColumn(ProductImageTableMap::POSITION);
         $query->addGroupByColumn(RewritingUrlTableMap::VIEW_ID);
-        $query->withColumn(ProductImageTableMap::FILE, 'PRODUCT_FILE');
+        $query->withColumn(ProductImageI18nTableMap::COL_FILE, 'PRODUCT_FILE');
 
         // Execute query
         $results = $query->find();
@@ -111,8 +112,6 @@ trait ProductImageTrait
 
         $joinI18n->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($joinI18n);
-
-
         // Join RewritingURL with ProductImage to have image file
         $joinImage = new Join();
 
@@ -129,5 +128,19 @@ trait ProductImageTrait
         $query->addJoinObject($joinImage, 'productImageJoin');
 
         $query->addJoinCondition('productImageJoin', ProductImageTableMap::VISIBLE.' = 1');
+
+        $joinImageI18n = new Join();
+
+        $joinImageI18n->addExplicitCondition(
+            ProductImageTableMap::TABLE_NAME,
+            'ID',
+            null,
+            ProductImageI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+
+        $joinImageI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinImageI18n, 'productImageI18nJoin');
     }
 }
