@@ -36,6 +36,10 @@ trait ProductImageTrait
         // Join with visible products
         self::addJoinProductI18n($query);
 
+        $query->addJoinCondition('productImageI18nJoin',
+            ProductImageI18nTableMap::COL_ID . '=' . ProductImageTableMap::COL_ID .
+            ' AND ' . ProductImageI18nTableMap::COL_LOCALE . ' = ?', $locale);
+
         // Get products title & image file name
         $query->withColumn(ProductI18nTableMap::TITLE, 'PRODUCT_TITLE');
         $query->addDescendingOrderByColumn(ProductImageTableMap::POSITION);
@@ -112,6 +116,7 @@ trait ProductImageTrait
 
         $joinI18n->setJoinType(Criteria::INNER_JOIN);
         $query->addJoinObject($joinI18n);
+
         // Join RewritingURL with ProductImage to have image file
         $joinImage = new Join();
 
@@ -128,19 +133,5 @@ trait ProductImageTrait
         $query->addJoinObject($joinImage, 'productImageJoin');
 
         $query->addJoinCondition('productImageJoin', ProductImageTableMap::VISIBLE.' = 1');
-
-        $joinImageI18n = new Join();
-
-        $joinImageI18n->addExplicitCondition(
-            ProductImageTableMap::TABLE_NAME,
-            'ID',
-            null,
-            ProductImageI18nTableMap::TABLE_NAME,
-            'ID',
-            null
-        );
-
-        $joinImageI18n->setJoinType(Criteria::INNER_JOIN);
-        $query->addJoinObject($joinImageI18n, 'productImageI18nJoin');
     }
 }
