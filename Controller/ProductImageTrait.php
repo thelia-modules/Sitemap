@@ -36,6 +36,20 @@ trait ProductImageTrait
         // Join with visible products
         self::addJoinProductI18n($query);
 
+        $joinImageI18n = new Join();
+
+        $joinImageI18n->addExplicitCondition(
+            ProductImageTableMap::TABLE_NAME,
+            'ID',
+            null,
+            ProductImageI18nTableMap::TABLE_NAME,
+            'ID',
+            null
+        );
+
+        $joinImageI18n->setJoinType(Criteria::INNER_JOIN);
+        $query->addJoinObject($joinImageI18n, 'productImageI18nJoin');
+
         $query->addJoinCondition('productImageI18nJoin',
             ProductImageI18nTableMap::COL_ID . '=' . ProductImageTableMap::COL_ID .
             ' AND ' . ProductImageI18nTableMap::COL_LOCALE . ' = ?', $locale);
