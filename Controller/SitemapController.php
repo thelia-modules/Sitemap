@@ -19,7 +19,7 @@ use Thelia\Model\ConfigQuery;
 use Thelia\Model\LangQuery;
 use Thelia\Model\RewritingUrl;
 use Thelia\Tools\URL;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Class SitemapController
@@ -50,8 +50,8 @@ class SitemapController extends BaseFrontController
 
     /**
      * Generate sitemap
-     * @Route("/sitemap", name="sitemap_generate")
      */
+    #[Route('/sitemap', name: 'sitemap_generate')]
     public function generateAction(EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
         return $this->generateSitemap(self::SITEMAP_CACHE_KEY, self::SITEMAP_CACHE_DIR, $eventDispatcher, $session, $requestStack);
@@ -59,8 +59,8 @@ class SitemapController extends BaseFrontController
 
     /**
      * Generate sitemap image
-     * @Route("/sitemap-image", name="sitemap_generate_image")
      */
+    #[Route('/sitemap-image', name: 'sitemap_generate_image')]
     public function generateImageAction(EventDispatcherInterface $eventDispatcher, Session $session, RequestStack $requestStack)
     {
         return $this->generateSitemap(self::SITEMAP_IMAGE_CACHE_KEY, self::SITEMAP_IMAGE_CACHE_DIR, $eventDispatcher, $session, $requestStack);

@@ -68,7 +68,7 @@ class EventManager implements EventSubscriberInterface
         $this->request = $request;
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             TheliaEvents::PRODUCT_DELETE  => [ 'deleteProduct' ],

@@ -10,11 +10,10 @@ use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Template\ParserContext;
 use Thelia\Form\Exception\FormValidationException;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Class SitemapConfigController
- * @Route("/admin/module/Sitemap", name="sitemap")
  * @package Sitemap\Controller
  * @author Etienne Perriere <eperriere@openstudio.fr>
  */
@@ -24,6 +23,7 @@ class SitemapConfigController extends BaseAdminController
      *
      * @Route("", name="_configure", methods="GET")
      */
+    #[Route('/admin/module/Sitemap', name: 'sitemap')]
     public function defaultAction()
     {
         if (null !== $response = $this->checkAuth([AdminResources::MODULE], ["sitemap"], AccessManager::VIEW)) {
@@ -81,9 +81,9 @@ class SitemapConfigController extends BaseAdminController
     /**
      * Save data
      *
-     * @Route("", name="_configue_save", methods="POST")
      * @return mixed|\Thelia\Core\HttpFoundation\Response
      */
+    #[Route(', name=', name: '_configue_save', methods: ['POST'])]
     public function saveAction(ParserContext $parserContext)
     {
         if (null !== $response = $this->checkAuth([AdminResources::MODULE], ["sitemap"], AccessManager::UPDATE)) {
