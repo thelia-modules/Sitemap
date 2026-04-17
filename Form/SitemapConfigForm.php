@@ -13,7 +13,7 @@ use Thelia\Form\BaseForm;
  */
 class SitemapConfigForm extends BaseForm
 {
-    public static function getName()
+    public static function getName(): string
     {
         return 'sitemap_config_form';
     }
