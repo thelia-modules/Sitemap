@@ -5,10 +5,11 @@ namespace Sitemap\Hook;
 use Sitemap\Form\SitemapConfigForm;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
-use Symfony\Component\DependencyInjection\Attribute\Required;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Core\Template\Parser\ParserResolver;
 
 /**
  * Class SitemapHook
@@ -17,12 +18,12 @@ use Thelia\Core\Hook\BaseHook;
  */
 class SitemapHook extends BaseHook
 {
-    private TheliaFormFactory $formFactory;
-
-    #[Required]
-    public function setFormFactory(TheliaFormFactory $formFactory): void
-    {
-        $this->formFactory = $formFactory;
+    public function __construct(
+        private readonly TheliaFormFactory $formFactory,
+        ?EventDispatcherInterface $dispatcher = null,
+        ?ParserResolver $parserResolver = null,
+    ) {
+        parent::__construct($dispatcher, $parserResolver);
     }
 
     public static function getSubscribedHooks(): array
