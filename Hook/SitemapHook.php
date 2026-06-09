@@ -3,8 +3,6 @@
 namespace Sitemap\Hook;
 
 use Sitemap\Form\SitemapConfigForm;
-use Sitemap\Model\SitemapPriority;
-use Sitemap\Model\SitemapPriority as SitemapPriorityModel;
 use Sitemap\Model\SitemapPriorityQuery;
 use Sitemap\Sitemap;
 use Symfony\Component\DependencyInjection\Attribute\Required;
@@ -19,6 +17,8 @@ use Thelia\Core\Hook\BaseHook;
  */
 class SitemapHook extends BaseHook
 {
+    private TheliaFormFactory $formFactory;
+
     #[Required]
     public function setFormFactory(TheliaFormFactory $formFactory): void
     {

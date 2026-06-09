@@ -38,7 +38,7 @@
 
         <div class="mb-3">
             {{ form_label(form.timeout, null, {label_attr: {class: 'form-label'}}) }}
-            <p class="form-text">{{ '<b>Warning!</b> Only fill this input with a greater value than 30 if you have so many images that the sitemap-image can\'t be generated because of timeout.'|trans({}, 'sitemap.bo.default')|raw }}</p>
+            <p class="form-text"><strong>{{ 'Warning!'|trans({}, 'sitemap.bo.default') }}</strong> {{ 'Only fill this input with a greater value than 30 if you have so many images that the sitemap-image can\'t be generated because of timeout.'|trans({}, 'sitemap.bo.default') }}</p>
             <p class="form-text">{{ 'Depending on your server, this may have no effect.'|trans({}, 'sitemap.bo.default') }}</p>
             {{ form_widget(form.timeout, {attr: {class: 'form-control'}}) }}
             {{ form_errors(form.timeout) }}
