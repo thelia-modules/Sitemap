@@ -17,7 +17,7 @@ use Sitemap\Model\SitemapPriority;
 use Sitemap\Model\SitemapPriorityQuery;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ServicesConfigurator;
 use Symfony\Component\Finder\Finder;
-use Thelia\Install\Database;
+use Thelia\Core\Install\Database;
 use Thelia\Module\BaseModule;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service_locator;
 
