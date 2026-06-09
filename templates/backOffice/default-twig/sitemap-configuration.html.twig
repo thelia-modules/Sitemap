@@ -4,7 +4,7 @@
         <h5 class="card-title mb-0">{{ 'Configure sitemap'|trans({}, 'sitemap') }}</h5>
     </div>
     <div class="card-body">
-        {{ form_start(form, {attr: {method: 'post', action: path('sitemap')}}) }}
+        {{ form_start(form, {attr: {method: 'post', action: path('sitemap_configure_save')}}) }}
 
         <div class="mb-3 form-check">
             <input type="checkbox"
