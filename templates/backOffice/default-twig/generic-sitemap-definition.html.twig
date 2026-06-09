@@ -1,0 +1,19 @@
+{# Hook fragment: renders sitemap priority input for entity edit right column #}
+<div class="card mb-3">
+    <div class="card-header">
+        <h6 class="card-title mb-0">{{ 'Sitemap priority'|trans({}, 'sitemap') }}</h6>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label" for="sitemap_priority">{{ 'Priority (0.0 – 1.0)'|trans({}, 'sitemap') }}</label>
+            <input type="number"
+                   id="sitemap_priority"
+                   name="sitemap_priority"
+                   class="form-control"
+                   step="0.1"
+                   min="0"
+                   max="1"
+                   value="{{ sitemapPriority }}">
+        </div>
+    </div>
+</div>

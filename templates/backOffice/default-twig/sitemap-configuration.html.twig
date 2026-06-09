@@ -1,0 +1,139 @@
+{# Sitemap module configuration fragment — rendered by module.configuration hook #}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">{{ 'Configure sitemap'|trans({}, 'sitemap') }}</h5>
+    </div>
+    <div class="card-body">
+        {{ form_start(form, {attr: {method: 'post', action: path('sitemap')}}) }}
+
+        <div class="mb-3 form-check">
+            <input type="checkbox"
+                   id="{{ form.exclude_empty_category.vars.id }}"
+                   name="{{ form.exclude_empty_category.vars.full_name }}"
+                   class="form-check-input"
+                   value="1"
+                   {{ form.exclude_empty_category.vars.value == '1' ? 'checked' : '' }}>
+            {{ form_label(form.exclude_empty_category, null, {label_attr: {class: 'form-check-label'}}) }}
+            {{ form_errors(form.exclude_empty_category) }}
+            {% do form.exclude_empty_category.setRendered %}
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox"
+                   id="{{ form.exclude_empty_folder.vars.id }}"
+                   name="{{ form.exclude_empty_folder.vars.full_name }}"
+                   class="form-check-input"
+                   value="1"
+                   {{ form.exclude_empty_folder.vars.value == '1' ? 'checked' : '' }}>
+            {{ form_label(form.exclude_empty_folder, null, {label_attr: {class: 'form-check-label'}}) }}
+            {{ form_errors(form.exclude_empty_folder) }}
+            {% do form.exclude_empty_folder.setRendered %}
+        </div>
+
+        <h6 class="mt-4 mb-3">{{ 'Configure sitemap images'|trans({}, 'sitemap') }}</h6>
+
+        <div class="alert alert-warning">
+            {{ 'Set the same information as in your product image loop'|trans({}, 'sitemap.bo.default') }}.
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.timeout, null, {label_attr: {class: 'form-label'}}) }}
+            <p class="form-text">{{ '<b>Warning!</b> Only fill this input with a greater value than 30 if you have so many images that the sitemap-image can\'t be generated because of timeout.'|trans({}, 'sitemap.bo.default')|raw }}</p>
+            <p class="form-text">{{ 'Depending on your server, this may have no effect.'|trans({}, 'sitemap.bo.default') }}</p>
+            {{ form_widget(form.timeout, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.timeout) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.width, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.width, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.width) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.height, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.height, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.height) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.quality, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.quality, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.quality) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.rotation, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.rotation, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.rotation) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.resize_mode, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.resize_mode, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.resize_mode) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.background_color, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.background_color, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.background_color) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.allow_zoom, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.allow_zoom, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.allow_zoom) }}
+        </div>
+
+        <h6 class="mt-4 mb-3">{{ 'Default priorities'|trans({}, 'sitemap') }}</h6>
+
+        <div class="mb-3">
+            {{ form_label(form.default_priority_homepage_value, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_priority_homepage_value, {attr: {class: 'form-control', type: 'number', step: '0.1', min: '0', max: '1'}}) }}
+            {{ form_errors(form.default_priority_homepage_value) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.default_priority_brand_value, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_priority_brand_value, {attr: {class: 'form-control', type: 'number', step: '0.1', min: '0', max: '1'}}) }}
+            {{ form_errors(form.default_priority_brand_value) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.default_priority_category_value, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_priority_category_value, {attr: {class: 'form-control', type: 'number', step: '0.1', min: '0', max: '1'}}) }}
+            {{ form_errors(form.default_priority_category_value) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.default_priority_product_value, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_priority_product_value, {attr: {class: 'form-control', type: 'number', step: '0.1', min: '0', max: '1'}}) }}
+            {{ form_errors(form.default_priority_product_value) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.default_priority_folder_value, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_priority_folder_value, {attr: {class: 'form-control', type: 'number', step: '0.1', min: '0', max: '1'}}) }}
+            {{ form_errors(form.default_priority_folder_value) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.default_update_frequency, null, {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.default_update_frequency, {attr: {class: 'form-control'}}) }}
+            {{ form_errors(form.default_update_frequency) }}
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> {{ 'Save'|trans({}, 'sitemap') }}
+            </button>
+            <a href="/admin/modules" class="btn btn-secondary ms-2">
+                {{ 'Cancel'|trans({}, 'sitemap') }}
+            </a>
+        </div>
+
+        {{ form_rest(form) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </div>
+</div>
