@@ -32,19 +32,19 @@ class SitemapHook extends BaseHook
             'module.configuration' => [
                 ['type' => 'back', 'method' => 'onModuleConfig'],
             ],
-            'product-edit.bottom' => [
+            'product.modification.form-right.bottom' => [
                 ['type' => 'back', 'method' => 'onProductEditRightColumnBottom'],
             ],
-            'category-edit.bottom' => [
+            'category.modification.form-right.bottom' => [
                 ['type' => 'back', 'method' => 'onCategoryEditRightColumnBottom'],
             ],
-            'content-edit.bottom' => [
+            'content.modification.form-right.bottom' => [
                 ['type' => 'back', 'method' => 'onContentEditRightColumnBottom'],
             ],
-            'folder-edit.bottom' => [
+            'folder.modification.form-right.bottom' => [
                 ['type' => 'back', 'method' => 'onFolderEditRightColumnBottom'],
             ],
-            'brand-edit.bottom' => [
+            'brand.modification.form-right.bottom' => [
                 ['type' => 'back', 'method' => 'onBrandEditRightColumnBottom'],
             ],
         ];
@@ -81,6 +81,7 @@ class SitemapHook extends BaseHook
                 'generic-sitemap-definition.html.twig',
                 [
                     'sitemapPriority' => $sitemapValue,
+                    'fieldName' => \sprintf('thelia_%s_modification[sitemapPriority]', $sourceType),
                 ]
             )
         );

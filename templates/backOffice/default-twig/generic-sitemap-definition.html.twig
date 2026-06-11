@@ -1,4 +1,4 @@
-{# Hook fragment: renders sitemap priority input for entity edit right column #}
+{# Posted with the surrounding entity form: the field itself is added to that form by EventManager on FORM_BEFORE_BUILD #}
 <div class="card mb-3">
     <div class="card-header">
         <h6 class="card-title mb-0">{{ 'Sitemap priority'|trans({}, 'sitemap') }}</h6>
@@ -8,7 +8,7 @@
             <label class="form-label" for="sitemap_priority">{{ 'Priority (0.0 – 1.0)'|trans({}, 'sitemap') }}</label>
             <input type="number"
                    id="sitemap_priority"
-                   name="sitemap_priority"
+                   name="{{ fieldName }}"
                    class="form-control"
                    step="0.1"
                    min="0"
