@@ -10,6 +10,7 @@ use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Form\TheliaFormFactory;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Template\Parser\ParserResolver;
+use Thelia\Core\Translation\Translator;
 
 /**
  * Class SitemapHook
@@ -82,6 +83,12 @@ class SitemapHook extends BaseHook
                 [
                     'sitemapPriority' => $sitemapValue,
                     'fieldName' => \sprintf('thelia_%s_modification[sitemapPriority]', $sourceType),
+                    // Translated server-side: the default-twig Twig |trans uses the Symfony translator,
+                    // which does not know the module domain, so it would render the English source.
+                    'labels' => [
+                        'title' => Translator::getInstance()->trans('Sitemap priority', [], Sitemap::DOMAIN_NAME),
+                        'field' => Translator::getInstance()->trans('Priority (0.0 – 1.0)', [], Sitemap::DOMAIN_NAME),
+                    ],
                 ]
             )
         );
