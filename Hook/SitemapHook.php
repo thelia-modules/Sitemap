@@ -94,15 +94,30 @@ class SitemapHook extends BaseHook
         );
     }
 
+    /**
+     * Maps an integer resize-mode constant back to its keyword string for the form field.
+     * Inverse of the keyword→int conversion performed in SitemapConfigController::saveAction().
+     */
+    private static function resizeModeIntToKeyword(mixed $storedValue): string
+    {
+        return match ((int) $storedValue) {
+            \Thelia\Action\Image::KEEP_IMAGE_RATIO        => 'none',
+            \Thelia\Action\Image::EXACT_RATIO_WITH_CROP   => 'crop',
+            default                                       => 'borders',
+        };
+    }
+
     public function onModuleConfig(HookRenderEvent $event): void
     {
+        $storedResizeMode = Sitemap::getConfigValue('resize_mode');
+
         $form = $this->formFactory->createForm(SitemapConfigForm::getName(), data: [
             'timeout'                          => Sitemap::getConfigValue('timeout'),
             'width'                            => Sitemap::getConfigValue('width'),
             'height'                           => Sitemap::getConfigValue('height'),
             'quality'                          => Sitemap::getConfigValue('quality'),
             'rotation'                         => Sitemap::getConfigValue('rotation'),
-            'resize_mode'                      => Sitemap::getConfigValue('resize_mode'),
+            'resize_mode'                      => $storedResizeMode !== null ? self::resizeModeIntToKeyword($storedResizeMode) : 'borders',
             'background_color'                 => Sitemap::getConfigValue('background_color'),
             'allow_zoom'                       => Sitemap::getConfigValue('allow_zoom'),
             'exclude_empty_category'           => Sitemap::getConfigValue('exclude_empty_category'),
