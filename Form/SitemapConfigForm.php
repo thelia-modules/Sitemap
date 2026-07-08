@@ -40,11 +40,6 @@ class SitemapConfigForm extends BaseForm
                 ['label' => $this->translator->trans('Image height', [], 'sitemap'), 'required' => false]
             )
             ->add(
-                'quality',
-                TextType::class,
-                ['label' => $this->translator->trans('Image quality', [], 'sitemap'), 'required' => false]
-            )
-            ->add(
                 'rotation',
                 TextType::class,
                 ['label' => $this->translator->trans('Image rotation', [], 'sitemap'), 'required' => false]

@@ -59,7 +59,6 @@ class SitemapConfigController extends BaseAdminController
             Sitemap::setConfigValue('timeout', $data['timeout']);
             Sitemap::setConfigValue('width', $data['width']);
             Sitemap::setConfigValue('height', $data['height']);
-            Sitemap::setConfigValue('quality', $data['quality']);
             Sitemap::setConfigValue('rotation', $data['rotation']);
             Sitemap::setConfigValue('resize_mode', $resizeMode);
             Sitemap::setConfigValue('background_color', $data['background_color']);
