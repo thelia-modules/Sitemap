@@ -59,19 +59,20 @@ class SitemapConfigController extends BaseAdminController
             Sitemap::setConfigValue('timeout', $data['timeout']);
             Sitemap::setConfigValue('width', $data['width']);
             Sitemap::setConfigValue('height', $data['height']);
-            Sitemap::setConfigValue('quality', $data['quality']);
             Sitemap::setConfigValue('rotation', $data['rotation']);
             Sitemap::setConfigValue('resize_mode', $resizeMode);
             Sitemap::setConfigValue('background_color', $data['background_color']);
             Sitemap::setConfigValue('allow_zoom', $data['allow_zoom']);
             Sitemap::setConfigValue('exclude_empty_category', $excludeEmptyCategory);
             Sitemap::setConfigValue('exclude_empty_folder', $excludeEmptyFolder);
-            Sitemap::setConfigValue('default_priority_homepage_value', $data['default_priority_homepage_value']);
-            Sitemap::setConfigValue('default_priority_brand_value', $data['default_priority_brand_value']);
-            Sitemap::setConfigValue('default_priority_category_value', $data['default_priority_category_value']);
-            Sitemap::setConfigValue('default_priority_product_value', $data['default_priority_product_value']);
-            Sitemap::setConfigValue('default_priority_folder_value', $data['default_priority_folder_value']);
-            Sitemap::setConfigValue('default_update_frequency', $data['default_update_frequency']);
+            // Optional fields: an empty value falls back to the module default so the
+            // generated sitemap never ends up with priority 0 / no changefreq.
+            Sitemap::setConfigValue('default_priority_homepage_value', $data['default_priority_homepage_value'] ?: Sitemap::DEFAULT_PRIORITY_HOME_VALUE);
+            Sitemap::setConfigValue('default_priority_brand_value', $data['default_priority_brand_value'] ?: Sitemap::DEFAULT_PRIORITY_BRAND_VALUE);
+            Sitemap::setConfigValue('default_priority_category_value', $data['default_priority_category_value'] ?: Sitemap::DEFAULT_PRIORITY_CATEGORY_VALUE);
+            Sitemap::setConfigValue('default_priority_product_value', $data['default_priority_product_value'] ?: Sitemap::DEFAULT_PRIORITY_PRODUCT_VALUE);
+            Sitemap::setConfigValue('default_priority_folder_value', $data['default_priority_folder_value'] ?: Sitemap::DEFAULT_PRIORITY_FOLDER_VALUE);
+            Sitemap::setConfigValue('default_update_frequency', $data['default_update_frequency'] ?: Sitemap::DEFAULT_FREQUENCY_UPDATE);
         } catch (FormValidationException $ex) {
             $errorMessage = $this->createStandardFormValidationErrorMessage($ex);
         } catch (\Exception $ex) {
