@@ -36,7 +36,6 @@ use Thelia\Core\Event\Product\ProductDeleteEvent;
 use Thelia\Core\Event\Product\ProductEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Event\TheliaFormEvent;
-use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Template\Loop\Argument\Argument;
 use Thelia\Core\Translation\Translator;
 use Thelia\Model\Map\BrandDocumentTableMap;
@@ -61,13 +60,6 @@ use Thelia\Type\TypeCollection;
 
 class EventManager implements EventSubscriberInterface
 {
-    protected $request;
-
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-    }
-
     public static function getSubscribedEvents(): array
     {
         return [
